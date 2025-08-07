@@ -7,28 +7,39 @@ pub const Button = struct {
     rect: rl.Rectangle,
     text: [:0]const u8,
 
-    const font_size = 10;
-    const default_colors = .{ Color.light_gray, Color.gray };
-    const hovered_colors = .{ Color.sky_blue, Color.blue };
-    const held_colors = .{ Color.blue, Color.dark_blue };
     /// Returns true when clicked
     pub fn draw(self: Button) bool {
+        return self.drawWithOptions(defaultButtonOptions);
+    }
+
+    pub fn drawWithOptions(self: Button, options: ButtonOptions) bool {
         const hovering = rl.checkCollisionPointRec(rl.getMousePosition(), self.rect);
         const holding = rl.isMouseButtonDown(.left);
         const primary_color, const secondary_color = if (holding and hovering)
-            held_colors
+            options.held_colors
         else if (hovering)
-            hovered_colors
+            options.hovered_colors
         else
-            default_colors;
+            options.default_colors;
         rl.drawRectangleRec(self.rect, primary_color);
         rl.drawRectangleLinesEx(self.rect, 5, secondary_color);
-        const text_width = rl.measureText(self.text, font_size);
+        const text_width = rl.measureText(self.text, options.font_size);
         const text_pos: rl.Vector2 = .{
             .x = self.rect.x + (self.rect.width - @as(f32, @floatFromInt(text_width))) / 2,
-            .y = self.rect.y + (self.rect.height - @as(f32, @floatFromInt(font_size))) / 2,
+            .y = self.rect.y + (self.rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
         };
-        rl.drawText(self.text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), font_size, secondary_color);
+        rl.drawText(self.text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, secondary_color);
         return rl.isMouseButtonReleased(.left) and hovering;
     }
+};
+
+pub var defaultButtonOptions: ButtonOptions = .{};
+
+pub const ButtonOptions = struct {
+    font_size: i32 = 10, // TODO: Consider changing this to u32
+    default_colors: Colors = .{ .light_gray, .gray },
+    hovered_colors: Colors = .{ .sky_blue, .blue },
+    held_colors: Colors = .{ .blue, .dark_blue },
+
+    const Colors = struct { Color, Color };
 };

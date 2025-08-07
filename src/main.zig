@@ -10,6 +10,7 @@ pub fn main() !void {
     rl.setTargetFPS(60);
 
     var counter: u32 = 0;
+    gui.defaultButtonOptions.font_size = 15;
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -17,6 +18,9 @@ pub fn main() !void {
         rl.clearBackground(.ray_white);
         if (test_button.draw()) {
             counter += 1;
+        }
+        if (custom_button.drawWithOptions(green_button_options)) {
+            counter -|= 1;
         }
         rl.drawText(rl.textFormat("%d", .{counter}), 295, 100, 20, .black);
     }
@@ -30,4 +34,19 @@ const test_button: gui.Button = .{
         .y = 150,
     },
     .text = "Test button",
+};
+
+const custom_button: gui.Button = .{
+    .rect = .{
+        .height = 60,
+        .width = 100,
+        .x = 250,
+        .y = 250,
+    },
+    .text = "Custom button",
+};
+
+const green_button_options: gui.ButtonOptions = .{
+    .hovered_colors = .{ .green, .init(0, 180, 100, 255) },
+    .held_colors = .{ .init(0, 180, 100, 255), .dark_green },
 };
