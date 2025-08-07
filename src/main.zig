@@ -12,7 +12,7 @@ pub fn main() !void {
     var counter: u32 = 0;
     var bg_color: rl.Color = .ray_white;
 
-    gui.defaultButtonOptions.font_size = 15;
+    gui.default_button_options.font_size = 15;
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -58,9 +58,10 @@ const custom_button: gui.Button = .{
     .text = "Custom button",
 };
 
+const greenish: rl.Color = .init(0, 180, 100, 255);
 const green_button_options: gui.ButtonOptions = .{
-    .hovered_colors = .{ .green, .init(0, 180, 100, 255) },
-    .held_colors = .{ .init(0, 180, 100, 255), .dark_green },
+    .hovered_colors = .colors(.green, greenish, greenish),
+    .held_colors = .colors(greenish, .dark_green, .dark_green),
 };
 
 const test_dropdown: gui.Dropdown = .{
