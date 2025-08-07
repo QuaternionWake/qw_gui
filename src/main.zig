@@ -10,17 +10,29 @@ pub fn main() !void {
     rl.setTargetFPS(60);
 
     var counter: u32 = 0;
+    var bg_color: rl.Color = .ray_white;
+
     gui.defaultButtonOptions.font_size = 15;
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
         defer rl.endDrawing();
 
-        rl.clearBackground(.ray_white);
+        rl.clearBackground(bg_color);
         if (test_button.draw()) {
             counter += 1;
         }
         if (custom_button.drawWithOptions(green_button_options)) {
             counter -|= 1;
+        }
+        if (test_dropdown.draw()) |idx| {
+            bg_color = switch (idx) {
+                0 => .ray_white,
+                1 => .red,
+                2 => .green,
+                3 => .sky_blue,
+                4 => .dark_gray,
+                else => unreachable,
+            };
         }
         rl.drawText(rl.textFormat("%d", .{counter}), 295, 100, 20, .black);
     }
@@ -50,3 +62,16 @@ const green_button_options: gui.ButtonOptions = .{
     .hovered_colors = .{ .green, .init(0, 180, 100, 255) },
     .held_colors = .{ .init(0, 180, 100, 255), .dark_green },
 };
+
+const test_dropdown: gui.Dropdown = .{
+    .rect = .{
+        .x = 20,
+        .y = 20,
+        .width = 80,
+        .height = 30,
+    },
+    .items = &.{ "White", "Red", "Green", "Blue", "Gray" },
+    .data = &test_dropdown_data,
+};
+
+var test_dropdown_data: gui.Dropdown.Data = .{};
