@@ -26,6 +26,7 @@ pub fn build(b: *std.Build) void {
     const rl_artifact = rl_dep.artifact("raylib");
 
     exe_mod.addImport("qw_gui", lib_mod);
+    exe_mod.addImport("raylib", raylib);
     lib_mod.addImport("raylib", raylib);
 
     const lib = b.addLibrary(.{
