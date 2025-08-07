@@ -1,0 +1,19 @@
+.{
+    .name = .qw_gui,
+    .version = "0.0.0",
+    .fingerprint = 0x829ed5062154fc71, // Changing this has security and trust implications.
+    .minimum_zig_version = "0.14.1",
+    .dependencies = .{
+        .raylib_zig = .{
+            .url = "git+https://github.com/Not-Nik/raylib-zig?ref=devel#7bdb0cd320454d5ee12b6aa734c63be589722261",
+            .hash = "raylib_zig-5.6.0-dev-KE8REM40BQBFO3EvEVqWU0QjNQXcEuGeQNIuwau-V3uN",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "LICENSE",
+        //"README.md",
+    },
+}
