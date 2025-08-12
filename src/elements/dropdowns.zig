@@ -30,8 +30,11 @@ pub const Dropdown = struct {
             .y = self.rect.y + (self.rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
         };
         rl.drawText(selected_text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, text_color);
-        if (g.holding(self.id(null)) and g.hovering(self.id(null)) and rl.isMouseButtonReleased(.left)) {
+        if (g.holding(self.id(null)) and g.hovering(self.id(null)) and rl.isMouseButtonPressed(.left)) {
             self.data.editing = !self.data.editing;
+        }
+        if (!g.holdingAny(self.id(null)) and rl.isMouseButtonPressed(.left)) {
+            self.data.editing = false;
         }
         if (self.data.editing) {
             const dropdown_rect = blk: {
@@ -45,7 +48,6 @@ pub const Dropdown = struct {
             var result: ?usize = null;
             for (self.items, 0..) |item, i| {
                 const item_rect = self.nthItemRect(i);
-                const hovering_item = rl.checkCollisionPointRec(rl.getMousePosition(), item_rect);
                 const item_text_width = rl.measureText(item, options.font_size);
                 const item_text_pos: rl.Vector2 = .{
                     .x = item_rect.x + (item_rect.width - @as(f32, @floatFromInt(item_text_width))) / 2,
@@ -55,14 +57,14 @@ pub const Dropdown = struct {
                     rl.drawRectangleRec(item_rect, options.held_colors.background);
                     rl.drawRectangleLinesEx(item_rect, options.border_thickness, options.held_colors.border);
                     rl.drawText(item, @intFromFloat(item_text_pos.x), @intFromFloat(item_text_pos.y), options.font_size, options.held_colors.text);
-                } else if (hovering_item and g.canGrab(self.id(i))) {
+                } else if (g.hovering(self.id(i)) and (g.canGrab(self.id(i)) or g.canGrab(self.id(null)))) {
                     rl.drawRectangleRec(item_rect, options.hovered_colors.background);
                     rl.drawRectangleLinesEx(item_rect, options.border_thickness, options.hovered_colors.border);
                     rl.drawText(item, @intFromFloat(item_text_pos.x), @intFromFloat(item_text_pos.y), options.font_size, options.hovered_colors.text);
                 } else {
                     rl.drawText(item, @intFromFloat(item_text_pos.x), @intFromFloat(item_text_pos.y), options.font_size, options.inactive_colors.text);
                 }
-                if (g.holding(self.id(i)) and hovering_item and rl.isMouseButtonReleased(.left)) {
+                if ((g.holding(self.id(i)) or g.holding(self.id(null))) and g.hovering(self.id(i)) and rl.isMouseButtonReleased(.left)) {
                     result = i;
                     self.data.selected = i;
                     self.data.editing = !self.data.editing;
@@ -86,6 +88,19 @@ pub const Dropdown = struct {
                 }
             }
         }
+    }
+
+    fn fullRect(self: Dropdown) rl.Rectangle {
+        var rect = self.rect;
+        rect.height *= @floatFromInt(self.items.len + 1);
+        return rect;
+    }
+
+    fn dropdownRect(self: Dropdown) rl.Rectangle {
+        var rect = self.rect;
+        rect.y += self.rect.height;
+        rect.height *= @floatFromInt(self.items.len);
+        return rect;
     }
 
     fn nthItemRect(self: Dropdown, n: usize) rl.Rectangle {
