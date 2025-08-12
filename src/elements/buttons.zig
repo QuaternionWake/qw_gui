@@ -16,9 +16,9 @@ pub const Button = struct {
 
     pub fn drawWithOptions(self: Button, options: ButtonOptions) bool {
         self.grab();
-        const bg_color, const border_color, const text_color = if (g.holding(self.id()))
+        const bg_color, const border_color, const text_color = if (g.holding(self.id()) and g.hovering(self.id()))
             options.held_colors.get()
-        else if (g.canGrab(self.id()))
+        else if (g.canGrab(self.id()) and g.hovering(self.id()))
             options.hovered_colors.get()
         else
             options.inactive_colors.get();
@@ -41,7 +41,7 @@ pub const Button = struct {
     }
 
     fn id(self: Button) g.ElementID {
-        return .{ .rect = self.rect };
+        return .{ .rect = self.rect, .data = null };
     }
 };
 

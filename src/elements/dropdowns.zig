@@ -15,9 +15,9 @@ pub const Dropdown = struct {
 
     pub fn drawWithOptions(self: Dropdown, options: DropdownOptions) ?usize {
         self.grab();
-        const bg_color, const border_color, const text_color = if (g.holding(self.id()) or self.data.editing)
+        const bg_color, const border_color, const text_color = if (g.holding(self.id(null)) and g.hovering(self.id(null)) or self.data.editing)
             options.held_colors.get()
-        else if (g.canGrab(self.id()))
+        else if (g.canGrab(self.id(null)) and g.hovering(self.id(null)))
             options.hovered_colors.get()
         else
             options.inactive_colors.get();
@@ -30,8 +30,7 @@ pub const Dropdown = struct {
             .y = self.rect.y + (self.rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
         };
         rl.drawText(selected_text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, text_color);
-        // FIXME: remove final condition on this after the grabbing system is able to handle this on its own
-        if (g.holding(self.id()) and g.hovering(self.id()) and rl.isMouseButtonReleased(.left) and rl.checkCollisionPointRec(rl.getMousePosition(), self.rect)) {
+        if (g.holding(self.id(null)) and g.hovering(self.id(null)) and rl.isMouseButtonReleased(.left)) {
             self.data.editing = !self.data.editing;
         }
         if (self.data.editing) {
@@ -45,11 +44,7 @@ pub const Dropdown = struct {
             rl.drawRectangleLinesEx(dropdown_rect, options.border_thickness, options.inactive_colors.border);
             var result: ?usize = null;
             for (self.items, 0..) |item, i| {
-                const item_rect = blk: {
-                    var rect = self.rect;
-                    rect.y += rect.height * @as(f32, @floatFromInt(i + 1));
-                    break :blk rect;
-                };
+                const item_rect = self.nthItemRect(i);
                 const hovering_item = rl.checkCollisionPointRec(rl.getMousePosition(), item_rect);
                 const item_text_width = rl.measureText(item, options.font_size);
                 const item_text_pos: rl.Vector2 = .{
@@ -60,14 +55,14 @@ pub const Dropdown = struct {
                     rl.drawRectangleRec(item_rect, options.held_colors.background);
                     rl.drawRectangleLinesEx(item_rect, options.border_thickness, options.held_colors.border);
                     rl.drawText(item, @intFromFloat(item_text_pos.x), @intFromFloat(item_text_pos.y), options.font_size, options.held_colors.text);
-                } else if (hovering_item and g.canGrab(self.id())) {
+                } else if (hovering_item and g.canGrab(self.id(i))) {
                     rl.drawRectangleRec(item_rect, options.hovered_colors.background);
                     rl.drawRectangleLinesEx(item_rect, options.border_thickness, options.hovered_colors.border);
                     rl.drawText(item, @intFromFloat(item_text_pos.x), @intFromFloat(item_text_pos.y), options.font_size, options.hovered_colors.text);
                 } else {
                     rl.drawText(item, @intFromFloat(item_text_pos.x), @intFromFloat(item_text_pos.y), options.font_size, options.inactive_colors.text);
                 }
-                if (g.holding(self.id()) and hovering_item and rl.isMouseButtonReleased(.left)) {
+                if (g.holding(self.id(i)) and hovering_item and rl.isMouseButtonReleased(.left)) {
                     result = i;
                     self.data.selected = i;
                     self.data.editing = !self.data.editing;
@@ -79,22 +74,28 @@ pub const Dropdown = struct {
     }
 
     pub fn grab(self: Dropdown) void {
-        const rect = if (self.data.editing) blk: {
-            var rect = self.rect;
-            rect.height *= @floatFromInt(self.items.len + 1);
-            break :blk rect;
-        } else blk: {
-            break :blk self.rect;
-        };
-
-        if (rl.checkCollisionPointRec(rl.getMousePosition(), rect)) {
-            g.hoverElement(self.id());
-            g.grabElement(self.id());
+        if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect)) {
+            g.hoverElement(self.id(null));
+            g.grabElement(self.id(null));
+        }
+        if (self.data.editing) {
+            for (0..self.items.len) |n| {
+                if (rl.checkCollisionPointRec(rl.getMousePosition(), self.nthItemRect(n))) {
+                    g.hoverElement(self.id(n));
+                    g.grabElement(self.id(n));
+                }
+            }
         }
     }
 
-    fn id(self: Dropdown) g.ElementID {
-        return .{ .rect = self.rect };
+    fn nthItemRect(self: Dropdown, n: usize) rl.Rectangle {
+        var rect = self.rect;
+        rect.y += rect.height * @as(f32, @floatFromInt(n + 1));
+        return rect;
+    }
+
+    fn id(self: Dropdown, data: ?usize) g.ElementID {
+        return .{ .rect = self.rect, .data = data };
     }
 
     pub const Data = struct {

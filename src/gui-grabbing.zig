@@ -5,6 +5,7 @@ const rl = @import("raylib");
 
 pub const ElementID = struct {
     rect: rl.Rectangle,
+    data: ?usize,
 };
 
 pub var hovered_element: ?ElementID = null;
