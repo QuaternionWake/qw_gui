@@ -16,13 +16,19 @@ pub fn main() !void {
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
         defer rl.endDrawing();
+        gui.updateGuiGlobals();
 
         rl.clearBackground(bg_color);
+        // grab first in case there is something below it, like maybe a scary button
+        test_dropdown.grab();
         if (test_button.draw()) {
             counter += 1;
         }
         if (custom_button.drawWithOptions(green_button_options)) {
             counter -|= 1;
+        }
+        if (scary_button.draw()) {
+            counter = 0;
         }
         if (test_dropdown.draw()) |idx| {
             bg_color = switch (idx) {
@@ -76,3 +82,13 @@ const test_dropdown: gui.Dropdown = .{
 };
 
 var test_dropdown_data: gui.Dropdown.Data = .{};
+
+const scary_button: gui.Button = .{
+    .rect = .{
+        .x = 20,
+        .y = 70,
+        .height = 60,
+        .width = 100,
+    },
+    .text = "Scary button",
+};
