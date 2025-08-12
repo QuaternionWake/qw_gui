@@ -12,7 +12,7 @@ pub fn main() !void {
     var counter: u32 = 0;
     var bg_color: rl.Color = .ray_white;
 
-    gui.default_button_options.font_size = 15;
+    gui.buttons.default_button_options.font_size = 15;
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -44,7 +44,7 @@ pub fn main() !void {
     }
 }
 
-const test_button: gui.Button = .{
+const test_button: gui.buttons.Button = .{
     .rect = .{
         .height = 60,
         .width = 100,
@@ -54,7 +54,7 @@ const test_button: gui.Button = .{
     .text = "Test button",
 };
 
-const custom_button: gui.Button = .{
+const custom_button: gui.buttons.Button = .{
     .rect = .{
         .height = 60,
         .width = 100,
@@ -65,12 +65,12 @@ const custom_button: gui.Button = .{
 };
 
 const greenish: rl.Color = .init(0, 180, 100, 255);
-const green_button_options: gui.ButtonOptions = .{
+const green_button_options: gui.buttons.ButtonOptions = .{
     .hovered_colors = .colors(.green, greenish, greenish),
     .held_colors = .colors(greenish, .dark_green, .dark_green),
 };
 
-const test_dropdown: gui.Dropdown = .{
+const test_dropdown: gui.dropdowns.Dropdown = .{
     .rect = .{
         .x = 20,
         .y = 20,
@@ -81,9 +81,9 @@ const test_dropdown: gui.Dropdown = .{
     .data = &test_dropdown_data,
 };
 
-var test_dropdown_data: gui.Dropdown.Data = .{};
+var test_dropdown_data: gui.dropdowns.Dropdown.Data = .{};
 
-const scary_button: gui.Button = .{
+const scary_button: gui.buttons.Button = .{
     .rect = .{
         .x = 20,
         .y = 70,
