@@ -21,6 +21,7 @@ pub fn main() !void {
         rl.clearBackground(bg_color);
 
         panel.draw();
+        box.draw();
         // grab first in case there is something below it, like maybe a scary button
         test_dropdown.grab();
         if (test_button.draw()) {
@@ -54,6 +55,16 @@ const panel: gui.containers.Panel = .{
         .y = 70,
     },
     .title = "TittTtTtleeEeEe",
+};
+
+const box: gui.containers.GroupBox = .{
+    .rect = .{
+        .height = 100,
+        .width = 120,
+        .x = 450,
+        .y = 150,
+    },
+    .title = "Wait what's this",
 };
 
 const test_button: gui.buttons.Button = .{
