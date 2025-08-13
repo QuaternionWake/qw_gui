@@ -19,6 +19,8 @@ pub fn main() !void {
         gui.updateGuiGlobals();
 
         rl.clearBackground(bg_color);
+
+        panel.draw();
         // grab first in case there is something below it, like maybe a scary button
         test_dropdown.grab();
         if (test_button.draw()) {
@@ -43,6 +45,16 @@ pub fn main() !void {
         rl.drawText(rl.textFormat("%d", .{counter}), 295, 100, 20, .black);
     }
 }
+
+const panel: gui.containers.Panel = .{
+    .rect = .{
+        .height = 260,
+        .width = 140,
+        .x = 230,
+        .y = 70,
+    },
+    .title = "TittTtTtleeEeEe",
+};
 
 const test_button: gui.buttons.Button = .{
     .rect = .{
