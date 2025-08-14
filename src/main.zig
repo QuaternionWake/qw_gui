@@ -44,6 +44,14 @@ pub fn main() !void {
             };
         }
         rl.drawText(rl.textFormat("%d", .{counter}), 295, 100, 20, .black);
+
+        if (slider_a.draw(true)) |_| {
+            rl.drawRectangle(420, 180, 20, 20, .green);
+        }
+        if (slider_b.draw(false)) |_| {
+            rl.drawRectangle(420, 210, 20, 20, .green);
+        }
+        rl.drawText(rl.textFormat("%f", .{slider_data.value}), 450, 270, 20, .black);
     }
 }
 
@@ -86,6 +94,28 @@ const custom_button: gui.buttons.Button = .{
     },
     .text = "Custom button",
 };
+
+const slider_a: gui.sliders.Slider = .{
+    .rect = .{
+        .height = 20,
+        .width = 100,
+        .x = 460,
+        .y = 180,
+    },
+    .data = &slider_data,
+};
+
+const slider_b: gui.sliders.Slider = .{
+    .rect = .{
+        .height = 20,
+        .width = 100,
+        .x = 460,
+        .y = 210,
+    },
+    .data = &slider_data,
+};
+
+var slider_data: gui.sliders.Slider.Data = .{ .value = 50, .min = -100, .max = 100 };
 
 const greenish: rl.Color = .init(0, 180, 100, 255);
 const green_button_options: gui.buttons.ButtonOptions = .{
