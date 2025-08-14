@@ -46,7 +46,7 @@ pub const PanelOptions = struct {
         pub fn colors(background: Color, bar: Color, border: Color, text: Color) Colors {
             return .{ .background = background, .bar = bar, .border = border, .text = text };
         }
-        pub fn get(self: Colors) struct { Color, Color, Color } {
+        pub fn get(self: Colors) struct { Color, Color, Color, Color } {
             return .{ self.background, self.bar, self.border, self.text };
         }
     };
@@ -128,7 +128,7 @@ pub const GroupBoxOptions = struct {
         pub fn colors(border: Color, text: Color) Colors {
             return .{ .border = border, .text = text };
         }
-        pub fn get(self: Colors) struct { Color, Color, Color } {
+        pub fn get(self: Colors) struct { Color, Color } {
             return .{ self.border, self.text };
         }
     };
