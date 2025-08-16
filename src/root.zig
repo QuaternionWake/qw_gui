@@ -1,4 +1,9 @@
+const std = @import("std");
 const rl = @import("raylib");
+
+comptime {
+    std.testing.refAllDecls(@import("utils/parsing.zig"));
+}
 
 pub const buttons = @import("elements/buttons.zig");
 pub const dropdowns = @import("elements/dropdowns.zig");
