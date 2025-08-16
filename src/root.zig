@@ -9,6 +9,7 @@ pub const buttons = @import("elements/buttons.zig");
 pub const dropdowns = @import("elements/dropdowns.zig");
 pub const containers = @import("elements/containers.zig");
 pub const sliders = @import("elements/sliders.zig");
+pub const inputs = @import("elements/inputs.zig");
 
 pub const grabbing = @import("gui-grabbing.zig");
 

@@ -8,6 +8,7 @@ pub fn main() !void {
     rl.initWindow(600, 400, "Test window");
     defer rl.closeWindow();
     rl.setTargetFPS(60);
+    rl.setExitKey(.null);
 
     var counter: u32 = 0;
     var bg_color: rl.Color = .ray_white;
@@ -25,10 +26,10 @@ pub fn main() !void {
         // grab first in case there is something below it, like maybe a scary button
         test_dropdown.grab();
         if (test_button.draw()) {
-            counter += 1;
+            counter +|= step_up_data.value;
         }
         if (custom_button.drawWithOptions(green_button_options)) {
-            counter -|= 1;
+            counter -|= step_down_data.value;
         }
         if (scary_button.draw()) {
             counter = 0;
@@ -44,6 +45,14 @@ pub fn main() !void {
             };
         }
         rl.drawText(rl.textFormat("%d", .{counter}), 295, 100, 20, .black);
+
+        if (step_up_input.draw(false)) |val| {
+            rl.drawText(rl.textFormat("%d", .{val}), 160, 175, 10, .black);
+        }
+
+        if (step_down_input.draw(true)) |val| {
+            rl.drawText(rl.textFormat("%d", .{val}), 160, 275, 10, .black);
+        }
 
         if (slider_a.draw(true)) |_| {
             rl.drawRectangle(420, 180, 20, 20, .green);
@@ -144,4 +153,36 @@ const scary_button: gui.buttons.Button = .{
         .width = 100,
     },
     .text = "Scary button",
+};
+
+const step_up_input: gui.inputs.ValueInput(u32) = .{
+    .rect = .{
+        .x = 160,
+        .y = 170,
+        .width = 50,
+        .height = 20,
+    },
+    .data = &step_up_data,
+};
+
+var step_up_data: gui.inputs.ValueInput(u32).Data = .{
+    .value = 1,
+    .min = 1,
+    .max = 1_000_000,
+};
+
+const step_down_input: gui.inputs.ValueInput(u32) = .{
+    .rect = .{
+        .x = 160,
+        .y = 270,
+        .width = 50,
+        .height = 20,
+    },
+    .data = &step_down_data,
+};
+
+var step_down_data: gui.inputs.ValueInput(u32).Data = .{
+    .value = 1,
+    .min = 1,
+    .max = 1_000_000,
 };
