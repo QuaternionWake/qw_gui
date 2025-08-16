@@ -45,16 +45,17 @@ pub fn parseInt(T: type, string: []const u8) fmt.ParseIntError!T {
         else blk: {
             const val = try fmt.parseInt(T, int_str, 10);
             break :blk if (val != 0)
-                val * (math.powi(T, 10, @intCast(int_order_of_magnitude)) catch return error.Overflow)
+                try math.mul(T, val, math.powi(T, 10, @intCast(int_order_of_magnitude)) catch return error.Overflow)
             else
                 0;
         };
     const dec =
         if (dec_str.len == 0)
             0
-        else if (dec_order_of_magnitude >= 0)
-            try fmt.parseInt(T, dec_str, 10) * (math.powi(T, 10, @intCast(dec_order_of_magnitude)) catch return error.Overflow)
-        else blk: {
+        else if (dec_order_of_magnitude >= 0) blk: {
+            const val = try fmt.parseInt(T, dec_str, 10);
+            break :blk try math.mul(T, val, (math.powi(T, 10, @intCast(dec_order_of_magnitude)) catch return error.Overflow));
+        } else blk: {
             const end: usize = @intCast(@as(isize, @intCast(dec_str.len)) + dec_order_of_magnitude);
             const val = if (end == 0) 0 else try fmt.parseInt(T, dec_str[0..end], 10);
             const char_after = dec_str[end];
