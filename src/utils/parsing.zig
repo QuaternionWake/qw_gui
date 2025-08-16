@@ -2,6 +2,7 @@ const std = @import("std");
 const math = std.math;
 const fmt = std.fmt;
 const mem = std.mem;
+const ascii = std.ascii;
 
 const suffixes = [_][]const u8{ "", "k", "M", "B", "T", "Qa", "Qi" };
 
@@ -33,7 +34,7 @@ pub fn parseInt(T: type, string: []const u8) fmt.ParseIntError!T {
 
     const int_order_of_magnitude: usize = blk: {
         for (suffixes, 0..) |s, i| {
-            if (mem.eql(u8, suffix, s)) break :blk i * 3;
+            if (ascii.eqlIgnoreCase(suffix, s)) break :blk i * 3;
         } else return error.InvalidCharacter;
     };
     const dec_order_of_magnitude = @as(isize, @intCast(int_order_of_magnitude)) - @as(isize, @intCast(dec_str.len));
@@ -117,4 +118,9 @@ test parseInt {
     try t.expectError(error.InvalidCharacter, parseInt(i32, "+."));
     try t.expectError(error.InvalidCharacter, parseInt(i32, ".k"));
     try t.expectError(error.InvalidCharacter, parseInt(i32, "-.k"));
+
+    try t.expectEqual(1234, parseInt(u32, "1.234K"));
+    try t.expectEqual(1234000, parseInt(u32, "1234K"));
+    try t.expectEqual(1234000, parseInt(u32, "1.234m"));
+    try t.expectEqual(1234, parseInt(u32, "0.000000000001234Qa"));
 }
