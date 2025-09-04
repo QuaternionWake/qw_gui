@@ -2,7 +2,7 @@
     .name = .qw_gui,
     .version = "0.0.0",
     .fingerprint = 0x829ed5062154fc71, // Changing this has security and trust implications.
-    .minimum_zig_version = "0.14.1",
+    .minimum_zig_version = "0.15.1",
     .dependencies = .{
         .raylib_zig = .{
             .url = "git+https://github.com/raylib-zig/raylib-zig?ref=devel#df70c5c952f61f84a39cd2af5649f5ad7a645b6f",
