@@ -22,12 +22,12 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    const raylib = rl_dep.module("raylib");
+    const rl_mod = rl_dep.module("raylib");
     const rl_artifact = rl_dep.artifact("raylib");
 
     exe_mod.addImport("qw_gui", lib_mod);
-    exe_mod.addImport("raylib", raylib);
-    lib_mod.addImport("raylib", raylib);
+    exe_mod.addImport("raylib", rl_mod);
+    lib_mod.addImport("raylib", rl_mod);
 
     const lib = b.addLibrary(.{
         .linkage = .static,
@@ -72,4 +72,38 @@ pub fn build(b: *std.Build) void {
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&run_lib_unit_tests.step);
     test_step.dependOn(&run_exe_unit_tests.step);
+
+    for (examples) |e| {
+        const example_mod = b.createModule(.{
+            .root_source_file = b.path(e.path),
+            .target = target,
+            .optimize = optimize,
+        });
+
+        example_mod.addImport("raylib", rl_mod);
+        example_mod.addImport("qw_gui", lib_mod);
+
+        const example_exe = b.addExecutable(.{
+            .name = e.name,
+            .root_module = example_mod,
+        });
+
+        const example_run_cmd = b.addRunArtifact(example_exe);
+        const example_run_step = b.step(e.name, e.description);
+        example_run_step.dependOn(&example_run_cmd.step);
+    }
 }
+
+const Example = struct {
+    name: []const u8,
+    path: []const u8,
+    description: []const u8,
+};
+
+const examples = [_]Example{
+    .{
+        .name = "buttons",
+        .path = "examples/buttons.zig",
+        .description = "Basic showcase of buttons",
+    },
+};
