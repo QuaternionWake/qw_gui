@@ -1,9 +1,7 @@
 const rl = @import("raylib");
 const Color = rl.Color;
 
-// TODO: fix this awfulness v
-const root = @import("../root.zig");
-const g = root.grabbing;
+const g = @import("grabbing");
 
 pub const Button = struct {
     rect: rl.Rectangle,

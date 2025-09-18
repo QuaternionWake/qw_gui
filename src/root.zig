@@ -2,7 +2,7 @@ const std = @import("std");
 const rl = @import("raylib");
 
 comptime {
-    std.testing.refAllDecls(@import("utils/parsing.zig"));
+    std.testing.refAllDecls(@import("utils"));
 }
 
 pub const buttons = @import("elements/buttons.zig");
@@ -11,7 +11,7 @@ pub const containers = @import("elements/containers.zig");
 pub const sliders = @import("elements/sliders.zig");
 pub const inputs = @import("elements/inputs.zig");
 
-pub const grabbing = @import("gui-grabbing.zig");
+pub const grabbing = @import("grabbing");
 
 pub fn updateGuiGlobals() void {
     grabbing.previous_held_element = grabbing.held_element;

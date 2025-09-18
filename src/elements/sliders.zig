@@ -4,8 +4,7 @@ const math = std.math;
 const rl = @import("raylib");
 const Color = rl.Color;
 
-const root = @import("../root.zig");
-const g = root.grabbing;
+const g = @import("grabbing");
 
 pub const Slider = struct {
     rect: rl.Rectangle,

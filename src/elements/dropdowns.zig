@@ -1,8 +1,7 @@
 const rl = @import("raylib");
 const Color = rl.Color;
 
-const root = @import("../root.zig");
-const g = root.grabbing;
+const g = @import("grabbing");
 
 pub const Dropdown = struct {
     rect: rl.Rectangle,

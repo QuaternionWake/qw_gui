@@ -7,10 +7,8 @@ const rl = @import("raylib");
 const Color = rl.Color;
 const Key = rl.KeyboardKey;
 
-// TODO: fix this awfulness v
-const root = @import("../root.zig");
-const parsing = @import("../utils/parsing.zig");
-const g = root.grabbing;
+const parsing = @import("utils").parsing;
+const g = @import("grabbing");
 
 pub fn ValueInput(T: type) type {
     const signed = @typeInfo(T).int.signedness == .signed;
