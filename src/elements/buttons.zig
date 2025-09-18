@@ -39,7 +39,7 @@ pub const Button = struct {
     }
 
     fn id(self: Button) g.ElementID {
-        return .{ .rect = self.rect, .data = null };
+        return .{ .inner = @intCast(@intFromPtr(self.text.ptr)) };
     }
 };
 

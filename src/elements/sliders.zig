@@ -73,7 +73,8 @@ pub const Slider = struct {
     }
 
     fn id(self: Slider) g.ElementID {
-        return .{ .rect = self.rect, .data = null };
+        // TODO: using the data pointer here is bad when data struct is shared
+        return .{ .inner = @intCast(@intFromPtr(self.data)) };
     }
 
     pub const Data = struct {

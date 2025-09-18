@@ -32,9 +32,6 @@ pub const Dropdown = struct {
         if (g.holding(self.id(null)) and g.hovering(self.id(null)) and rl.isMouseButtonPressed(.left)) {
             self.data.editing = !self.data.editing;
         }
-        if (!g.holdingAny(self.id(null)) and rl.isMouseButtonPressed(.left)) {
-            self.data.editing = false;
-        }
         if (self.data.editing) {
             const dropdown_rect = blk: {
                 var rect = self.rect;
@@ -109,7 +106,11 @@ pub const Dropdown = struct {
     }
 
     fn id(self: Dropdown, data: ?usize) g.ElementID {
-        return .{ .rect = self.rect, .data = data };
+        return if (data) |d|
+            .{ .inner = @intCast(@intFromPtr(self.items[d].ptr)) }
+        else
+            // TODO: using the data pointer here is bad when data struct is shared
+            .{ .inner = @intCast(@intFromPtr(self.data)) };
     }
 
     pub const Data = struct {

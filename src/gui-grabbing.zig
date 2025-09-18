@@ -1,19 +1,13 @@
 const std = @import("std");
-const meta = std.meta;
 
 const rl = @import("raylib");
 
 pub const ElementID = struct {
-    rect: rl.Rectangle,
-    data: ?usize,
+    inner: u64,
 
     pub fn eql(lhs: ElementID, rhs: ?ElementID) bool {
-        return meta.eql(rhs, lhs);
-    }
-
-    pub fn eqlAny(lhs: ElementID, rhs: ?ElementID) bool {
         return if (rhs) |r|
-            meta.eql(lhs.rect, r.rect)
+            lhs.inner == r.inner
         else
             false;
     }
@@ -49,16 +43,4 @@ pub fn holding(id: ElementID) bool {
 
 pub fn hovering(id: ElementID) bool {
     return id.eql(hovered_element) or id.eql(previous_hovered_element);
-}
-
-pub fn canGrabAny(id: ElementID) bool {
-    return holdingAny(id) or hoveringAny(id) and held_element == null;
-}
-
-pub fn holdingAny(id: ElementID) bool {
-    return id.eqlAny(held_element) or id.eqlAny(previous_held_element);
-}
-
-pub fn hoveringAny(id: ElementID) bool {
-    return id.eqlAny(hovered_element) or id.eqlAny(previous_hovered_element);
 }

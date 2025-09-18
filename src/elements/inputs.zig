@@ -184,7 +184,8 @@ pub fn ValueInput(T: type) type {
         }
 
         fn id(self: ValueInput(T)) g.ElementID {
-            return .{ .rect = self.rect, .data = null };
+            // TODO: using the data pointer here is bad when data struct is shared
+            return .{ .inner = @intFromPtr(self.data) };
         }
 
         pub const Data = struct {
