@@ -9,11 +9,12 @@ const Key = rl.KeyboardKey;
 
 const parsing = @import("utils").parsing;
 const g = @import("grabbing");
+const Rect = @import("Rect");
 
 pub fn ValueInput(T: type) type {
     const signed = @typeInfo(T).int.signedness == .signed;
     return struct {
-        rect: rl.Rectangle,
+        rect: Rect,
         data: *ValueInput(T).Data,
 
         /// Returns new value. If `return_on_change` is true, returns every frame
@@ -29,6 +30,7 @@ pub fn ValueInput(T: type) type {
         }
 
         pub fn drawWithOptions(self: ValueInput(T), return_on_change: bool, options: InputFieldOptions) ?T {
+            const rect = self.rect.rlRect();
             self.grab();
             var fallback_text = "number too big".*;
             const bg_color, const border_color, const text_color, const cursor_color = if (self.data.editing or g.holding(self.id()) and g.hovering(self.id()))
@@ -37,8 +39,8 @@ pub fn ValueInput(T: type) type {
                 options.hovered_colors.get()
             else
                 options.inactive_colors.get();
-            rl.drawRectangleRec(self.rect, bg_color);
-            rl.drawRectangleLinesEx(self.rect, options.border_thickness, border_color);
+            rl.drawRectangleRec(rect, bg_color);
+            rl.drawRectangleLinesEx(rect, options.border_thickness, border_color);
 
             if (!self.data.editing and g.holding(self.id()) and g.hovering(self.id()) and rl.isMouseButtonReleased(.left)) {
                 self.data.editing = true;
@@ -46,10 +48,10 @@ pub fn ValueInput(T: type) type {
             }
 
             const text_rect: rl.Rectangle = .{
-                .x = self.rect.x + options.border_thickness + options.padding,
-                .y = self.rect.y + options.border_thickness + options.padding,
-                .width = self.rect.width - 2 * (options.border_thickness + options.padding),
-                .height = self.rect.height - 2 * (options.border_thickness + options.padding),
+                .x = rect.x + options.border_thickness + options.padding,
+                .y = rect.y + options.border_thickness + options.padding,
+                .width = rect.width - 2 * (options.border_thickness + options.padding),
+                .height = rect.height - 2 * (options.border_thickness + options.padding),
             };
             const font_size: i32 = @intFromFloat(text_rect.height);
             const max_text_width = text_rect.width;
@@ -177,7 +179,7 @@ pub fn ValueInput(T: type) type {
         }
 
         pub fn grab(self: ValueInput(T)) void {
-            if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect)) {
+            if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect())) {
                 g.hoverElement(self.id());
                 g.grabElement(self.id());
             }

@@ -5,9 +5,10 @@ const rl = @import("raylib");
 const Color = rl.Color;
 
 const g = @import("grabbing");
+const Rect = @import("Rect");
 
 pub const Slider = struct {
-    rect: rl.Rectangle,
+    rect: Rect,
     data: *Slider.Data,
 
     /// Returns new value. If `return_on_change` is true, returns every frame
@@ -17,6 +18,7 @@ pub const Slider = struct {
     }
 
     pub fn drawWithOptions(self: Slider, return_on_change: bool, options: SliderOptions) ?f32 {
+        const rect = self.rect.rlRect();
         self.grab();
         const bg_color, const border_color, const box_color = if (g.holding(self.id()))
             options.held_colors.get()
@@ -24,11 +26,11 @@ pub const Slider = struct {
             options.hovered_colors.get()
         else
             options.inactive_colors.get();
-        rl.drawRectangleRec(self.rect, bg_color);
-        rl.drawRectangleLinesEx(self.rect, options.border_thickness, border_color);
+        rl.drawRectangleRec(rect, bg_color);
+        rl.drawRectangleLinesEx(rect, options.border_thickness, border_color);
 
-        const min_x = self.rect.x + options.border_thickness + options.padding + options.box_width / 2;
-        const max_x = self.rect.x + self.rect.width - options.border_thickness - options.padding - options.box_width / 2;
+        const min_x = rect.x + options.border_thickness + options.padding + options.box_width / 2;
+        const max_x = rect.x + rect.width - options.border_thickness - options.padding - options.box_width / 2;
 
         const mouse_x: f32 = @floatFromInt(rl.getMouseX());
         const slider_width = max_x - min_x;
@@ -51,9 +53,9 @@ pub const Slider = struct {
 
         const box: rl.Rectangle = .{
             .x = box_center_x - options.box_width / 2,
-            .y = self.rect.y + options.border_thickness + options.padding,
+            .y = rect.y + options.border_thickness + options.padding,
             .width = options.box_width,
-            .height = self.rect.height - (options.border_thickness + options.padding) * 2,
+            .height = rect.height - (options.border_thickness + options.padding) * 2,
         };
         rl.drawRectangleRec(box, box_color);
 
@@ -66,7 +68,7 @@ pub const Slider = struct {
     }
 
     pub fn grab(self: Slider) void {
-        if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect)) {
+        if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect())) {
             g.hoverElement(self.id());
             g.grabElement(self.id());
         }

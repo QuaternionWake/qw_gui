@@ -2,9 +2,10 @@ const rl = @import("raylib");
 const Color = rl.Color;
 
 const g = @import("grabbing");
+const Rect = @import("Rect");
 
 pub const Dropdown = struct {
-    rect: rl.Rectangle,
+    rect: Rect,
     items: []const [:0]const u8,
     data: *Dropdown.Data,
 
@@ -13,6 +14,7 @@ pub const Dropdown = struct {
     }
 
     pub fn drawWithOptions(self: Dropdown, options: DropdownOptions) ?usize {
+        const rect = self.rect.rlRect();
         self.grab();
         const bg_color, const border_color, const text_color = if (g.holding(self.id(null)) and g.hovering(self.id(null)) or self.data.editing)
             options.held_colors.get()
@@ -20,25 +22,20 @@ pub const Dropdown = struct {
             options.hovered_colors.get()
         else
             options.inactive_colors.get();
-        rl.drawRectangleRec(self.rect, bg_color);
-        rl.drawRectangleLinesEx(self.rect, options.border_thickness, border_color);
+        rl.drawRectangleRec(rect, bg_color);
+        rl.drawRectangleLinesEx(rect, options.border_thickness, border_color);
         const selected_text = self.items[self.data.selected];
         const text_width = rl.measureText(selected_text, options.font_size);
         const text_pos: rl.Vector2 = .{
-            .x = self.rect.x + (self.rect.width - @as(f32, @floatFromInt(text_width))) / 2,
-            .y = self.rect.y + (self.rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
+            .x = rect.x + (rect.width - @as(f32, @floatFromInt(text_width))) / 2,
+            .y = rect.y + (rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
         };
         rl.drawText(selected_text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, text_color);
         if (g.holding(self.id(null)) and g.hovering(self.id(null)) and rl.isMouseButtonPressed(.left)) {
             self.data.editing = !self.data.editing;
         }
         if (self.data.editing) {
-            const dropdown_rect = blk: {
-                var rect = self.rect;
-                rect.y += self.rect.height;
-                rect.height *= @floatFromInt(self.items.len);
-                break :blk rect;
-            };
+            const dropdown_rect = self.dropdownRect();
             rl.drawRectangleRec(dropdown_rect, options.inactive_colors.background);
             rl.drawRectangleLinesEx(dropdown_rect, options.border_thickness, options.inactive_colors.border);
             var result: ?usize = null;
@@ -72,7 +69,7 @@ pub const Dropdown = struct {
     }
 
     pub fn grab(self: Dropdown) void {
-        if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect)) {
+        if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect())) {
             g.hoverElement(self.id(null));
             g.grabElement(self.id(null));
         }
@@ -87,20 +84,20 @@ pub const Dropdown = struct {
     }
 
     fn fullRect(self: Dropdown) rl.Rectangle {
-        var rect = self.rect;
+        var rect = self.rect.rlRect();
         rect.height *= @floatFromInt(self.items.len + 1);
         return rect;
     }
 
     fn dropdownRect(self: Dropdown) rl.Rectangle {
-        var rect = self.rect;
-        rect.y += self.rect.height;
+        var rect = self.rect.rlRect();
+        rect.y += rect.height;
         rect.height *= @floatFromInt(self.items.len);
         return rect;
     }
 
     fn nthItemRect(self: Dropdown, n: usize) rl.Rectangle {
-        var rect = self.rect;
+        var rect = self.rect.rlRect();
         rect.y += rect.height * @as(f32, @floatFromInt(n + 1));
         return rect;
     }

@@ -2,9 +2,10 @@ const rl = @import("raylib");
 const Color = rl.Color;
 
 const g = @import("grabbing");
+const Rect = @import("Rect");
 
 pub const Button = struct {
-    rect: rl.Rectangle,
+    rect: Rect,
     text: [:0]const u8,
 
     /// Returns true when clicked
@@ -13,6 +14,7 @@ pub const Button = struct {
     }
 
     pub fn drawWithOptions(self: Button, options: ButtonOptions) bool {
+        const rect = self.rect.rlRect();
         self.grab();
         const bg_color, const border_color, const text_color = if (g.holding(self.id()) and g.hovering(self.id()))
             options.held_colors.get()
@@ -20,19 +22,19 @@ pub const Button = struct {
             options.hovered_colors.get()
         else
             options.inactive_colors.get();
-        rl.drawRectangleRec(self.rect, bg_color);
-        rl.drawRectangleLinesEx(self.rect, options.border_thickness, border_color);
+        rl.drawRectangleRec(rect, bg_color);
+        rl.drawRectangleLinesEx(rect, options.border_thickness, border_color);
         const text_width = rl.measureText(self.text, options.font_size);
         const text_pos: rl.Vector2 = .{
-            .x = self.rect.x + (self.rect.width - @as(f32, @floatFromInt(text_width))) / 2,
-            .y = self.rect.y + (self.rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
+            .x = rect.x + (rect.width - @as(f32, @floatFromInt(text_width))) / 2,
+            .y = rect.y + (rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
         };
         rl.drawText(self.text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, text_color);
         return g.holding(self.id()) and g.hovering(self.id()) and rl.isMouseButtonReleased(.left);
     }
 
     pub fn grab(self: Button) void {
-        if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect)) {
+        if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect())) {
             g.hoverElement(self.id());
             g.grabElement(self.id());
         }

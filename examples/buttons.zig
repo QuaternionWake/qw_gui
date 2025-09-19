@@ -32,20 +32,22 @@ pub fn main() !void {
 
 const increment_button: gui.buttons.Button = .{
     .rect = .{
-        .height = 60,
-        .width = 100,
-        .x = 150,
-        .y = 150,
+        .parent = null,
+        .x = .{ .left = 150 },
+        .y = .{ .top = 150 },
+        .width = .{ .amount = 100 },
+        .height = .{ .amount = 60 },
     },
     .text = "Increment value",
 };
 
 const decrement_button: gui.buttons.Button = .{
     .rect = .{
-        .height = 60,
-        .width = 100,
-        .x = 350,
-        .y = 150,
+        .parent = null,
+        .x = .{ .right = -150 },
+        .y = .{ .top = 150 },
+        .width = .{ .amount = 100 },
+        .height = .{ .amount = 60 },
     },
     .text = "Decrement value",
 };
@@ -59,10 +61,11 @@ const decrement_button_options: gui.buttons.ButtonOptions = .{
 
 const reset_button: gui.buttons.Button = .{
     .rect = .{
-        .x = 20,
-        .y = 20,
-        .height = 60,
-        .width = 100,
+        .parent = null,
+        .x = .{ .left = 20 },
+        .y = .{ .top = 20 },
+        .height = .{ .amount = 60 },
+        .width = .{ .amount = 100 },
     },
     .text = "Reset value",
 };

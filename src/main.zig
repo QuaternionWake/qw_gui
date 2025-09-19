@@ -66,60 +66,66 @@ pub fn main() !void {
 
 const panel: gui.containers.Panel = .{
     .rect = .{
-        .height = 260,
-        .width = 140,
-        .x = 230,
-        .y = 70,
+        .parent = null,
+        .x = .{ .middle = 0 },
+        .y = .{ .middle = 0 },
+        .width = .{ .amount = 140 },
+        .height = .{ .amount = 260 },
     },
     .title = "TittTtTtleeEeEe",
 };
 
 const box: gui.containers.GroupBox = .{
     .rect = .{
-        .height = 100,
-        .width = 120,
-        .x = 450,
-        .y = 150,
+        .parent = null,
+        .x = .{ .left = 450 },
+        .y = .{ .middle = 0 },
+        .width = .{ .amount = 120 },
+        .height = .{ .amount = 100 },
     },
     .title = "Wait what's this",
 };
 
 const test_button: gui.buttons.Button = .{
     .rect = .{
-        .height = 60,
-        .width = 100,
-        .x = 250,
-        .y = 150,
+        .parent = &panel.rect,
+        .x = .{ .middle = 0 },
+        .y = .{ .top = 80 },
+        .width = .{ .amount = 100 },
+        .height = .{ .amount = 60 },
     },
     .text = "Test button",
 };
 
 const custom_button: gui.buttons.Button = .{
     .rect = .{
-        .height = 60,
-        .width = 100,
-        .x = 250,
-        .y = 250,
+        .parent = &panel.rect,
+        .x = .{ .middle = 0 },
+        .y = .{ .top = 180 },
+        .width = .{ .amount = 100 },
+        .height = .{ .amount = 60 },
     },
     .text = "Custom button",
 };
 
 const slider_a: gui.sliders.Slider = .{
     .rect = .{
-        .height = 20,
-        .width = 100,
-        .x = 460,
-        .y = 180,
+        .parent = &box.rect,
+        .x = .{ .middle = 0 },
+        .y = .{ .top = 30 },
+        .width = .{ .amount = 100 },
+        .height = .{ .amount = 20 },
     },
     .data = &slider_data,
 };
 
 const slider_b: gui.sliders.Slider = .{
     .rect = .{
-        .height = 20,
-        .width = 100,
-        .x = 460,
-        .y = 210,
+        .parent = &box.rect,
+        .x = .{ .middle = 0 },
+        .y = .{ .top = 60 },
+        .width = .{ .amount = 100 },
+        .height = .{ .amount = 20 },
     },
     .data = &slider_data,
 };
@@ -134,10 +140,11 @@ const green_button_options: gui.buttons.ButtonOptions = .{
 
 const test_dropdown: gui.dropdowns.Dropdown = .{
     .rect = .{
-        .x = 20,
-        .y = 20,
-        .width = 80,
-        .height = 30,
+        .parent = null,
+        .x = .{ .left = 20 },
+        .y = .{ .top = 20 },
+        .width = .{ .amount = 80 },
+        .height = .{ .amount = 30 },
     },
     .items = &.{ "White", "Red", "Green", "Blue", "Gray" },
     .data = &test_dropdown_data,
@@ -147,20 +154,22 @@ var test_dropdown_data: gui.dropdowns.Dropdown.Data = .{};
 
 const scary_button: gui.buttons.Button = .{
     .rect = .{
-        .x = 20,
-        .y = 70,
-        .height = 60,
-        .width = 100,
+        .parent = null,
+        .x = .{ .left = 20 },
+        .y = .{ .top = 70 },
+        .height = .{ .amount = 60 },
+        .width = .{ .amount = 100 },
     },
     .text = "Scary button",
 };
 
 const step_up_input: gui.inputs.ValueInput(u32) = .{
     .rect = .{
-        .x = 160,
-        .y = 170,
-        .width = 50,
-        .height = 20,
+        .parent = &test_button.rect,
+        .x = .{ .left = -90 },
+        .y = .{ .middle = 0 },
+        .width = .{ .amount = 50 },
+        .height = .{ .amount = 20 },
     },
     .data = &step_up_data,
 };
@@ -173,10 +182,11 @@ var step_up_data: gui.inputs.ValueInput(u32).Data = .{
 
 const step_down_input: gui.inputs.ValueInput(u32) = .{
     .rect = .{
-        .x = 160,
-        .y = 270,
-        .width = 50,
-        .height = 20,
+        .parent = &custom_button.rect,
+        .x = .{ .left = -90 },
+        .y = .{ .middle = 0 },
+        .width = .{ .amount = 50 },
+        .height = .{ .amount = 20 },
     },
     .data = &step_down_data,
 };

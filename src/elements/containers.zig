@@ -2,9 +2,10 @@ const rl = @import("raylib");
 const Color = rl.Color;
 
 const g = @import("grabbing");
+const Rect = @import("Rect");
 
 pub const Panel = struct {
-    rect: rl.Rectangle,
+    rect: Rect,
     title: ?[:0]const u8,
 
     pub fn draw(self: Panel) void {
@@ -12,13 +13,14 @@ pub const Panel = struct {
     }
 
     pub fn drawWithOptions(self: Panel, options: PanelOptions) void {
-        rl.drawRectangleRec(self.rect, options.colors.background);
-        rl.drawRectangleLinesEx(self.rect, options.border_thickness, options.colors.border);
+        const rect = self.rect.rlRect();
+        rl.drawRectangleRec(rect, options.colors.background);
+        rl.drawRectangleLinesEx(rect, options.border_thickness, options.colors.border);
         if (self.title) |title| {
             const bar_rect = blk: {
-                var rect = self.rect;
-                rect.height = 20;
-                break :blk rect;
+                var bar_rect = rect;
+                bar_rect.height = 20;
+                break :blk bar_rect;
             };
             rl.drawRectangleRec(bar_rect, options.colors.bar);
             rl.drawRectangleLinesEx(bar_rect, options.border_thickness, options.colors.border);
@@ -52,7 +54,7 @@ pub const PanelOptions = struct {
 };
 
 pub const GroupBox = struct {
-    rect: rl.Rectangle,
+    rect: Rect,
     title: ?[:0]const u8,
 
     pub fn draw(self: GroupBox) void {
@@ -60,28 +62,29 @@ pub const GroupBox = struct {
     }
 
     pub fn drawWithOptions(self: GroupBox, options: GroupBoxOptions) void {
+        const rect = self.rect.rlRect();
         const left_edge: rl.Rectangle = .{
-            .x = self.rect.x,
-            .y = self.rect.y,
+            .x = rect.x,
+            .y = rect.y,
             .width = options.border_thickness,
-            .height = self.rect.height,
+            .height = rect.height,
         };
         const right_edge: rl.Rectangle = .{
-            .x = self.rect.x + self.rect.width - options.border_thickness,
-            .y = self.rect.y,
+            .x = rect.x + rect.width - options.border_thickness,
+            .y = rect.y,
             .width = options.border_thickness,
-            .height = self.rect.height,
+            .height = rect.height,
         };
         const bottom_edge: rl.Rectangle = .{
-            .x = self.rect.x + options.border_thickness,
-            .y = self.rect.y + self.rect.height - options.border_thickness,
-            .width = self.rect.width - 2 * options.border_thickness,
+            .x = rect.x + options.border_thickness,
+            .y = rect.y + rect.height - options.border_thickness,
+            .width = rect.width - 2 * options.border_thickness,
             .height = options.border_thickness,
         };
         const top_edge: rl.Rectangle = .{
-            .x = self.rect.x + options.border_thickness,
-            .y = self.rect.y,
-            .width = self.rect.width - 2 * options.border_thickness,
+            .x = rect.x + options.border_thickness,
+            .y = rect.y,
+            .width = rect.width - 2 * options.border_thickness,
             .height = options.border_thickness,
         };
 
@@ -90,19 +93,19 @@ pub const GroupBox = struct {
         rl.drawRectangleRec(bottom_edge, options.colors.border);
 
         if (self.title) |title| {
-            const text_x = self.rect.x + options.border_thickness + 10;
-            const text_y = self.rect.y + (options.border_thickness - @as(f32, @floatFromInt(options.font_size))) / 2;
+            const text_x = rect.x + options.border_thickness + 10;
+            const text_y = rect.y + (options.border_thickness - @as(f32, @floatFromInt(options.font_size))) / 2;
             const top_left_edge = blk: {
-                var rect = top_edge;
-                rect.width = 5;
-                break :blk rect;
+                var top_left_edge = top_edge;
+                top_left_edge.width = 5;
+                break :blk top_left_edge;
             };
             const top_right_edge = blk: {
-                var rect = top_edge;
+                var top_right_edge = top_edge;
                 const text_width = rl.measureText(title, options.font_size);
-                rect.x += @floatFromInt(10 + text_width + 5);
-                rect.width -= @floatFromInt(10 + text_width + 5);
-                break :blk rect;
+                top_right_edge.x += @floatFromInt(10 + text_width + 5);
+                top_right_edge.width -= @floatFromInt(10 + text_width + 5);
+                break :blk top_right_edge;
             };
             rl.drawText(title, @intFromFloat(text_x), @intFromFloat(text_y), options.font_size, options.colors.text);
             rl.drawRectangleRec(top_right_edge, options.colors.border);
