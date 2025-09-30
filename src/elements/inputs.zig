@@ -16,6 +16,7 @@ pub fn ValueInput(T: type) type {
     return struct {
         rect: Rect,
         data: *ValueInput(T).Data,
+        id: []const u8,
 
         /// Returns new value. If `return_on_change` is true, returns every frame
         /// when the value changes, otherwise returns only when editing finishes.
@@ -33,16 +34,16 @@ pub fn ValueInput(T: type) type {
             const rect = self.rect.rlRect();
             self.grab();
             var fallback_text = "number too big".*;
-            const bg_color, const border_color, const text_color, const cursor_color = if (self.data.editing or g.holding(self.id()) and g.hovering(self.id()))
+            const bg_color, const border_color, const text_color, const cursor_color = if (self.data.editing or g.holding(self.id) and g.hovering(self.id))
                 options.held_colors.get()
-            else if (g.canGrab(self.id()) and g.hovering(self.id()))
+            else if (g.canGrab(self.id) and g.hovering(self.id))
                 options.hovered_colors.get()
             else
                 options.inactive_colors.get();
             rl.drawRectangleRec(rect, bg_color);
             rl.drawRectangleLinesEx(rect, options.border_thickness, border_color);
 
-            if (!self.data.editing and g.holding(self.id()) and g.hovering(self.id()) and rl.isMouseButtonReleased(.left)) {
+            if (!self.data.editing and g.holding(self.id) and g.hovering(self.id) and rl.isMouseButtonReleased(.left)) {
                 self.data.editing = true;
                 self.data.text = fmt.bufPrintZ(&self.data.buffer, "{d}", .{self.data.value}) catch &fallback_text;
             }
@@ -77,7 +78,7 @@ pub fn ValueInput(T: type) type {
                 };
                 rl.drawRectangleRec(cursor_rect, cursor_color);
 
-                if (!g.hovering(self.id()) and rl.isMouseButtonPressed(.left)) {
+                if (!g.hovering(self.id) and rl.isMouseButtonPressed(.left)) {
                     self.data.editing = false;
                     const val = parsing.parseInt(T, self.data.text) catch |err| blk: {
                         if (err == error.Overflow) {
@@ -180,14 +181,9 @@ pub fn ValueInput(T: type) type {
 
         pub fn grab(self: ValueInput(T)) void {
             if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect())) {
-                g.hoverElement(self.id());
-                g.grabElement(self.id());
+                g.hoverElement(self.id);
+                g.grabElement(self.id);
             }
-        }
-
-        fn id(self: ValueInput(T)) g.ElementID {
-            // TODO: using the data pointer here is bad when data struct is shared
-            return .{ .inner = @intFromPtr(self.data) };
         }
 
         pub const Data = struct {

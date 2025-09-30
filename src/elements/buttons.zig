@@ -7,6 +7,7 @@ const Rect = @import("Rect");
 pub const Button = struct {
     rect: Rect,
     text: [:0]const u8,
+    id: []const u8,
 
     /// Returns true when clicked
     pub fn draw(self: Button) bool {
@@ -16,9 +17,9 @@ pub const Button = struct {
     pub fn drawWithOptions(self: Button, options: ButtonOptions) bool {
         const rect = self.rect.rlRect();
         self.grab();
-        const bg_color, const border_color, const text_color = if (g.holding(self.id()) and g.hovering(self.id()))
+        const bg_color, const border_color, const text_color = if (g.holding(self.id) and g.hovering(self.id))
             options.held_colors.get()
-        else if (g.canGrab(self.id()) and g.hovering(self.id()))
+        else if (g.canGrab(self.id) and g.hovering(self.id))
             options.hovered_colors.get()
         else
             options.inactive_colors.get();
@@ -30,18 +31,14 @@ pub const Button = struct {
             .y = rect.y + (rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
         };
         rl.drawText(self.text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, text_color);
-        return g.holding(self.id()) and g.hovering(self.id()) and rl.isMouseButtonReleased(.left);
+        return g.holding(self.id) and g.hovering(self.id) and rl.isMouseButtonReleased(.left);
     }
 
     pub fn grab(self: Button) void {
         if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect())) {
-            g.hoverElement(self.id());
-            g.grabElement(self.id());
+            g.hoverElement(self.id);
+            g.grabElement(self.id);
         }
-    }
-
-    fn id(self: Button) g.ElementID {
-        return .{ .inner = @intCast(@intFromPtr(self.text.ptr)) };
     }
 };
 

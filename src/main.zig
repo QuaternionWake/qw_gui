@@ -95,6 +95,7 @@ const test_button: gui.buttons.Button = .{
         .height = .{ .amount = 60 },
     },
     .text = "Test button",
+    .id = "test_button",
 };
 
 const custom_button: gui.buttons.Button = .{
@@ -106,6 +107,7 @@ const custom_button: gui.buttons.Button = .{
         .height = .{ .amount = 60 },
     },
     .text = "Custom button",
+    .id = "custom_button",
 };
 
 const slider_a: gui.sliders.Slider = .{
@@ -117,6 +119,7 @@ const slider_a: gui.sliders.Slider = .{
         .height = .{ .amount = 20 },
     },
     .data = &slider_data,
+    .id = "slider_a",
 };
 
 const slider_b: gui.sliders.Slider = .{
@@ -128,6 +131,7 @@ const slider_b: gui.sliders.Slider = .{
         .height = .{ .amount = 20 },
     },
     .data = &slider_data,
+    .id = "slider_b",
 };
 
 var slider_data: gui.sliders.Slider.Data = .{ .value = 50, .min = -100, .max = 100 };
@@ -148,6 +152,7 @@ const test_dropdown: gui.dropdowns.Dropdown = .{
     },
     .items = &.{ "White", "Red", "Green", "Blue", "Gray" },
     .data = &test_dropdown_data,
+    .id = "test_dropdown",
 };
 
 var test_dropdown_data: gui.dropdowns.Dropdown.Data = .{};
@@ -161,6 +166,7 @@ const scary_button: gui.buttons.Button = .{
         .width = .{ .amount = 100 },
     },
     .text = "Scary button",
+    .id = "scary_button",
 };
 
 const step_up_input: gui.inputs.ValueInput(u32) = .{
@@ -172,6 +178,7 @@ const step_up_input: gui.inputs.ValueInput(u32) = .{
         .height = .{ .amount = 20 },
     },
     .data = &step_up_data,
+    .id = "step_up_input",
 };
 
 var step_up_data: gui.inputs.ValueInput(u32).Data = .{
@@ -189,6 +196,7 @@ const step_down_input: gui.inputs.ValueInput(u32) = .{
         .height = .{ .amount = 20 },
     },
     .data = &step_down_data,
+    .id = "step_down_input",
 };
 
 var step_down_data: gui.inputs.ValueInput(u32).Data = .{

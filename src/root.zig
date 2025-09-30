@@ -14,8 +14,19 @@ pub const inputs = @import("elements/inputs.zig");
 pub const grabbing = @import("grabbing");
 
 pub fn updateGuiGlobals() void {
-    grabbing.previous_held_element = grabbing.held_element;
-    grabbing.previous_hovered_element = grabbing.hovered_element;
+    if (grabbing.held_element) |held| {
+        const len = grabbing.setId(&grabbing.previous_held_buf, held);
+        grabbing.previous_held_element = grabbing.previous_held_buf[0..len];
+    } else {
+        grabbing.previous_held_element = null;
+    }
+    if (grabbing.hovered_element) |hovered| {
+        const len = grabbing.setId(&grabbing.previous_hovered_buf, hovered);
+        grabbing.previous_hovered_element = grabbing.previous_hovered_buf[0..len];
+    } else {
+        grabbing.previous_hovered_element = null;
+    }
+
     grabbing.hovered_element = null;
     if (!rl.isMouseButtonDown(.left)) {
         grabbing.held_element = null;

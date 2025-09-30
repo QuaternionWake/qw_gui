@@ -10,6 +10,7 @@ const Rect = @import("Rect");
 pub const Slider = struct {
     rect: Rect,
     data: *Slider.Data,
+    id: []const u8,
 
     /// Returns new value. If `return_on_change` is true, returns every frame
     /// when the value changes, otherwise returns on mouse button release
@@ -20,9 +21,9 @@ pub const Slider = struct {
     pub fn drawWithOptions(self: Slider, return_on_change: bool, options: SliderOptions) ?f32 {
         const rect = self.rect.rlRect();
         self.grab();
-        const bg_color, const border_color, const box_color = if (g.holding(self.id()))
+        const bg_color, const border_color, const box_color = if (g.holding(self.id))
             options.held_colors.get()
-        else if (g.canGrab(self.id()) and g.hovering(self.id()))
+        else if (g.canGrab(self.id) and g.hovering(self.id))
             options.hovered_colors.get()
         else
             options.inactive_colors.get();
@@ -37,7 +38,7 @@ pub const Slider = struct {
         const data_width = self.data.max - self.data.min;
 
         var result: ?f32 = null;
-        if (g.holding(self.id())) {
+        if (g.holding(self.id)) {
             const old_val = self.data.value;
             const unclamped_val = (mouse_x - min_x) / slider_width * data_width + self.data.min;
             self.data.value = math.clamp(unclamped_val, self.data.min, self.data.max);
@@ -46,7 +47,7 @@ pub const Slider = struct {
             }
         }
 
-        const box_center_x = if (g.holding(self.id()))
+        const box_center_x = if (g.holding(self.id))
             math.clamp(mouse_x, min_x, max_x)
         else
             (self.data.value - self.data.min) / data_width * slider_width + min_x;
@@ -61,7 +62,7 @@ pub const Slider = struct {
 
         return if (return_on_change)
             result
-        else if (g.holding(self.id()) and !rl.isMouseButtonDown(.left))
+        else if (g.holding(self.id) and !rl.isMouseButtonDown(.left))
             self.data.value
         else
             null;
@@ -69,14 +70,9 @@ pub const Slider = struct {
 
     pub fn grab(self: Slider) void {
         if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect())) {
-            g.hoverElement(self.id());
-            g.grabElement(self.id());
+            g.hoverElement(self.id);
+            g.grabElement(self.id);
         }
-    }
-
-    fn id(self: Slider) g.ElementID {
-        // TODO: using the data pointer here is bad when data struct is shared
-        return .{ .inner = @intCast(@intFromPtr(self.data)) };
     }
 
     pub const Data = struct {

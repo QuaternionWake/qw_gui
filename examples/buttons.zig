@@ -39,6 +39,7 @@ const increment_button: gui.buttons.Button = .{
         .height = .{ .amount = 60 },
     },
     .text = "Increment value",
+    .id = "increment_button",
 };
 
 const decrement_button: gui.buttons.Button = .{
@@ -50,6 +51,7 @@ const decrement_button: gui.buttons.Button = .{
         .height = .{ .amount = 60 },
     },
     .text = "Decrement value",
+    .id = "decrement_button",
 };
 
 const bright_red: rl.Color = .init(255, 100, 90, 255);
@@ -68,4 +70,5 @@ const reset_button: gui.buttons.Button = .{
         .width = .{ .amount = 100 },
     },
     .text = "Reset value",
+    .id = "reset_button",
 };
