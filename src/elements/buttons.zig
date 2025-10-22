@@ -16,13 +16,14 @@ pub const Button = struct {
 
     pub fn drawWithOptions(self: Button, options: ButtonOptions) bool {
         const rect = self.rect.rlRect();
-        self.grab();
-        const bg_color, const border_color, const text_color = if (g.holding(self.id) and g.hovering(self.id))
-            options.held_colors.get()
-        else if (g.canGrab(self.id) and g.hovering(self.id))
-            options.hovered_colors.get()
-        else
-            options.inactive_colors.get();
+        const holding, const hovering, const can_grab = self.grab();
+        const bg_color, const border_color, const text_color =
+            if (holding.currently and hovering.currently)
+                options.held_colors.get()
+            else if (can_grab and hovering.currently)
+                options.hovered_colors.get()
+            else
+                options.inactive_colors.get();
         rl.drawRectangleRec(rect, bg_color);
         rl.drawRectangleLinesEx(rect, options.border_thickness, border_color);
         const text_width = rl.measureText(self.text, options.font_size);
@@ -31,14 +32,15 @@ pub const Button = struct {
             .y = rect.y + (rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
         };
         rl.drawText(self.text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, text_color);
-        return g.holding(self.id) and g.hovering(self.id) and rl.isMouseButtonReleased(.left);
+        return hovering.currently and holding == g.HoldInfo.released;
     }
 
-    pub fn grab(self: Button) void {
+    pub fn grab(self: Button) g.InteractionInfo {
         if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect())) {
             g.hoverElement(self.id);
             g.grabElement(self.id);
         }
+        return g.getInteractionInfo(self.id);
     }
 };
 

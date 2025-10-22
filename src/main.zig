@@ -24,7 +24,7 @@ pub fn main() !void {
         panel.draw();
         box.draw();
         // grab first in case there is something below it, like maybe a scary button
-        test_dropdown.grab();
+        _ = test_dropdown.grab();
         if (test_button.draw()) {
             counter +|= step_up_data.value;
         }

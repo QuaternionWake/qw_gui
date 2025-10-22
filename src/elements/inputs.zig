@@ -32,18 +32,19 @@ pub fn ValueInput(T: type) type {
 
         pub fn drawWithOptions(self: ValueInput(T), return_on_change: bool, options: InputFieldOptions) ?T {
             const rect = self.rect.rlRect();
-            self.grab();
+            const holding, const hovering, const can_grab = self.grab();
             var fallback_text = "number too big".*;
-            const bg_color, const border_color, const text_color, const cursor_color = if (self.data.editing or g.holding(self.id) and g.hovering(self.id))
-                options.held_colors.get()
-            else if (g.canGrab(self.id) and g.hovering(self.id))
-                options.hovered_colors.get()
-            else
-                options.inactive_colors.get();
+            const bg_color, const border_color, const text_color, const cursor_color =
+                if (self.data.editing or holding.currently and hovering.currently)
+                    options.held_colors.get()
+                else if (can_grab and hovering.currently)
+                    options.hovered_colors.get()
+                else
+                    options.inactive_colors.get();
             rl.drawRectangleRec(rect, bg_color);
             rl.drawRectangleLinesEx(rect, options.border_thickness, border_color);
 
-            if (!self.data.editing and g.holding(self.id) and g.hovering(self.id) and rl.isMouseButtonReleased(.left)) {
+            if (!self.data.editing and hovering.currently and holding == g.HoldInfo.grabbed) {
                 self.data.editing = true;
                 self.data.text = fmt.bufPrintZ(&self.data.buffer, "{d}", .{self.data.value}) catch &fallback_text;
             }
@@ -78,7 +79,7 @@ pub fn ValueInput(T: type) type {
                 };
                 rl.drawRectangleRec(cursor_rect, cursor_color);
 
-                if (!g.hovering(self.id) and rl.isMouseButtonPressed(.left)) {
+                if (!hovering.currently and rl.isMouseButtonPressed(.left)) {
                     self.data.editing = false;
                     const val = parsing.parseInt(T, self.data.text) catch |err| blk: {
                         if (err == error.Overflow) {
@@ -179,11 +180,12 @@ pub fn ValueInput(T: type) type {
             return result;
         }
 
-        pub fn grab(self: ValueInput(T)) void {
+        pub fn grab(self: ValueInput(T)) g.InteractionInfo {
             if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect())) {
                 g.hoverElement(self.id);
                 g.grabElement(self.id);
             }
+            return g.getInteractionInfo(self.id);
         }
 
         pub const Data = struct {

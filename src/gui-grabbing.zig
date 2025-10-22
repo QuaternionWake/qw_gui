@@ -27,6 +27,26 @@ pub var previous_hovered_element: ?[]const u8 = null;
 pub var held_element: ?[]const u8 = null;
 pub var previous_held_element: ?[]const u8 = null;
 
+pub const InteractionInfo = struct { HoldInfo, HoverInfo, CanGrab };
+
+pub const HoldInfo = packed struct {
+    currently: bool,
+    previously: bool,
+
+    pub const grabbed: HoldInfo = .{ .currently = true, .previously = false };
+    pub const released: HoldInfo = .{ .currently = false, .previously = true };
+};
+
+pub const HoverInfo = packed struct {
+    currently: bool,
+    previously: bool,
+
+    pub const hovered: HoverInfo = .{ .currently = true, .previously = false };
+    pub const unhovered: HoverInfo = .{ .currently = false, .previously = true };
+};
+
+pub const CanGrab = bool;
+
 pub fn grabElement(id: []const u8) void {
     if (rl.isMouseButtonDown(.left)) {
         if (held_element == null) {
@@ -45,14 +65,28 @@ pub fn hoverElement(id: []const u8) void {
     }
 }
 
+pub fn getInteractionInfo(id: []const u8) InteractionInfo {
+    return .{
+        getHoldInfo(id),
+        getHoverInfo(id),
+        canGrab(id),
+    };
+}
+
+pub fn getHoldInfo(id: []const u8) HoldInfo {
+    return .{
+        .currently = idEql(id, held_element),
+        .previously = idEql(id, previous_held_element),
+    };
+}
+
+pub fn getHoverInfo(id: []const u8) HoverInfo {
+    return .{
+        .currently = idEql(id, hovered_element),
+        .previously = idEql(id, previous_hovered_element),
+    };
+}
+
 pub fn canGrab(id: []const u8) bool {
-    return holding(id) or hovering(id) and held_element == null;
-}
-
-pub fn holding(id: []const u8) bool {
-    return idEql(id, held_element) or idEql(id, previous_held_element);
-}
-
-pub fn hovering(id: []const u8) bool {
-    return idEql(id, hovered_element) or idEql(id, previous_hovered_element);
+    return idEql(id, held_element) or idEql(id, hovered_element) and held_element == null;
 }

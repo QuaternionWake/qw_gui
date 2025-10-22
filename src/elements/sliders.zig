@@ -20,13 +20,14 @@ pub const Slider = struct {
 
     pub fn drawWithOptions(self: Slider, return_on_change: bool, options: SliderOptions) ?f32 {
         const rect = self.rect.rlRect();
-        self.grab();
-        const bg_color, const border_color, const box_color = if (g.holding(self.id))
-            options.held_colors.get()
-        else if (g.canGrab(self.id) and g.hovering(self.id))
-            options.hovered_colors.get()
-        else
-            options.inactive_colors.get();
+        const holding, const hovering, const can_grab = self.grab();
+        const bg_color, const border_color, const box_color =
+            if (holding.currently)
+                options.held_colors.get()
+            else if (can_grab and hovering.currently)
+                options.hovered_colors.get()
+            else
+                options.inactive_colors.get();
         rl.drawRectangleRec(rect, bg_color);
         rl.drawRectangleLinesEx(rect, options.border_thickness, border_color);
 
@@ -38,7 +39,7 @@ pub const Slider = struct {
         const data_width = self.data.max - self.data.min;
 
         var result: ?f32 = null;
-        if (g.holding(self.id)) {
+        if (holding.currently) {
             const old_val = self.data.value;
             const unclamped_val = (mouse_x - min_x) / slider_width * data_width + self.data.min;
             self.data.value = math.clamp(unclamped_val, self.data.min, self.data.max);
@@ -47,7 +48,7 @@ pub const Slider = struct {
             }
         }
 
-        const box_center_x = if (g.holding(self.id))
+        const box_center_x = if (holding.currently)
             math.clamp(mouse_x, min_x, max_x)
         else
             (self.data.value - self.data.min) / data_width * slider_width + min_x;
@@ -62,17 +63,18 @@ pub const Slider = struct {
 
         return if (return_on_change)
             result
-        else if (g.holding(self.id) and !rl.isMouseButtonDown(.left))
+        else if (holding == g.HoldInfo.released)
             self.data.value
         else
             null;
     }
 
-    pub fn grab(self: Slider) void {
+    pub fn grab(self: Slider) g.InteractionInfo {
         if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect())) {
             g.hoverElement(self.id);
             g.grabElement(self.id);
         }
+        return g.getInteractionInfo(self.id);
     }
 
     pub const Data = struct {
