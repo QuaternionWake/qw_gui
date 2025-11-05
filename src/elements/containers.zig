@@ -14,16 +14,20 @@ pub const Panel = struct {
 
     pub fn drawWithOptions(self: Panel, options: PanelOptions) void {
         const rect = self.rect.rlRect();
+
         rl.drawRectangleRec(rect, options.colors.background);
         rl.drawRectangleLinesEx(rect, options.border_thickness, options.colors.border);
+
         if (self.title) |title| {
             const bar_rect = blk: {
                 var bar_rect = rect;
                 bar_rect.height = 20;
                 break :blk bar_rect;
             };
+
             rl.drawRectangleRec(bar_rect, options.colors.bar);
             rl.drawRectangleLinesEx(bar_rect, options.border_thickness, options.colors.border);
+
             const text_x = bar_rect.x + 3;
             const text_y = bar_rect.y + (bar_rect.height - @as(f32, @floatFromInt(options.font_size))) / 2;
             rl.drawText(title, @intFromFloat(text_x), @intFromFloat(text_y), options.font_size, options.colors.text);

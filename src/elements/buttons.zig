@@ -19,14 +19,17 @@ pub fn drawButton(
             options.hovered_colors.get()
         else
             options.inactive_colors.get();
+
     rl.drawRectangleRec(rl_rect, bg_color);
     rl.drawRectangleLinesEx(rl_rect, options.border_thickness, border_color);
+
     const text_width = rl.measureText(text, options.font_size);
     const text_pos: rl.Vector2 = .{
         .x = rl_rect.x + (rl_rect.width - @as(f32, @floatFromInt(text_width))) / 2,
         .y = rl_rect.y + (rl_rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
     };
     rl.drawText(text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, text_color);
+
     return hovering.currently and holding == g.HoldInfo.released;
 }
 

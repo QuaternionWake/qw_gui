@@ -21,8 +21,10 @@ pub fn drawDropdown(
             options.hovered_colors.get()
         else
             options.inactive_colors.get();
+
     rl.drawRectangleRec(rl_rect, bg_color);
     rl.drawRectangleLinesEx(rl_rect, options.border_thickness, border_color);
+
     const selected_text = items[selected.*];
     const text_width = rl.measureText(selected_text, options.font_size);
     const text_pos: rl.Vector2 = .{
@@ -30,6 +32,7 @@ pub fn drawDropdown(
         .y = rl_rect.y + (rl_rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
     };
     rl.drawText(selected_text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, text_color);
+
     if (holding.currently and hovering.currently) {
         if (rl.checkCollisionPointRec(rl.getMousePosition(), rl_rect) and rl.isMouseButtonPressed(.left)) {
             editing.* = !editing.*;
@@ -37,10 +40,12 @@ pub fn drawDropdown(
     } else if (rl.isMouseButtonPressed(.left)) {
         editing.* = false;
     }
+
     if (editing.*) {
         const dropdown_rect = dropdownRect(rl_rect, items.len);
         rl.drawRectangleRec(dropdown_rect, options.inactive_colors.background);
         rl.drawRectangleLinesEx(dropdown_rect, options.border_thickness, options.inactive_colors.border);
+
         var result: ?usize = null;
         for (items, 0..) |item, i| {
             const item_rect = nthItemRect(rl_rect, i);
@@ -49,6 +54,7 @@ pub fn drawDropdown(
                 .x = item_rect.x + (item_rect.width - @as(f32, @floatFromInt(item_text_width))) / 2,
                 .y = item_rect.y + (item_rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
             };
+
             const hovering_item = rl.checkCollisionPointRec(rl.getMousePosition(), item_rect);
             if (i == selected.*) {
                 rl.drawRectangleRec(item_rect, options.held_colors.background);
@@ -61,6 +67,7 @@ pub fn drawDropdown(
             } else {
                 rl.drawText(item, @intFromFloat(item_text_pos.x), @intFromFloat(item_text_pos.y), options.font_size, options.inactive_colors.text);
             }
+
             if (hovering.currently and holding == g.HoldInfo.released and hovering_item) {
                 result = i;
                 selected.* = i;
