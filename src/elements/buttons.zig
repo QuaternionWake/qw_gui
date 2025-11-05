@@ -4,6 +4,32 @@ const Color = rl.Color;
 const g = @import("grabbing");
 const Rect = @import("Rect");
 
+pub fn drawButton(
+    options: ButtonOptions,
+    rect: Rect,
+    interaction: g.InteractionInfo,
+    text: [:0]const u8,
+) bool {
+    const rl_rect = rect.rlRect();
+    const holding, const hovering, const can_grab = interaction;
+    const bg_color, const border_color, const text_color =
+        if (holding.currently and hovering.currently)
+            options.held_colors.get()
+        else if (can_grab and hovering.currently)
+            options.hovered_colors.get()
+        else
+            options.inactive_colors.get();
+    rl.drawRectangleRec(rl_rect, bg_color);
+    rl.drawRectangleLinesEx(rl_rect, options.border_thickness, border_color);
+    const text_width = rl.measureText(text, options.font_size);
+    const text_pos: rl.Vector2 = .{
+        .x = rl_rect.x + (rl_rect.width - @as(f32, @floatFromInt(text_width))) / 2,
+        .y = rl_rect.y + (rl_rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
+    };
+    rl.drawText(text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, text_color);
+    return hovering.currently and holding == g.HoldInfo.released;
+}
+
 pub const Button = struct {
     rect: Rect,
     text: [:0]const u8,
@@ -15,24 +41,12 @@ pub const Button = struct {
     }
 
     pub fn drawWithOptions(self: Button, options: ButtonOptions) bool {
-        const rect = self.rect.rlRect();
-        const holding, const hovering, const can_grab = self.grab();
-        const bg_color, const border_color, const text_color =
-            if (holding.currently and hovering.currently)
-                options.held_colors.get()
-            else if (can_grab and hovering.currently)
-                options.hovered_colors.get()
-            else
-                options.inactive_colors.get();
-        rl.drawRectangleRec(rect, bg_color);
-        rl.drawRectangleLinesEx(rect, options.border_thickness, border_color);
-        const text_width = rl.measureText(self.text, options.font_size);
-        const text_pos: rl.Vector2 = .{
-            .x = rect.x + (rect.width - @as(f32, @floatFromInt(text_width))) / 2,
-            .y = rect.y + (rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
-        };
-        rl.drawText(self.text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, text_color);
-        return hovering.currently and holding == g.HoldInfo.released;
+        return drawButton(
+            options,
+            self.rect,
+            self.grab(),
+            self.text,
+        );
     }
 
     pub fn grab(self: Button) g.InteractionInfo {

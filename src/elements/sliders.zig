@@ -7,6 +7,65 @@ const Color = rl.Color;
 const g = @import("grabbing");
 const Rect = @import("Rect");
 
+pub fn drawSlider(
+    options: SliderOptions,
+    rect: Rect,
+    interaction: g.InteractionInfo,
+    min: f32,
+    max: f32,
+    value: *f32,
+    return_on_change: bool,
+) ?f32 {
+    const rl_rect = rect.rlRect();
+    const holding, const hovering, const can_grab = interaction;
+    const bg_color, const border_color, const box_color =
+        if (holding.currently)
+            options.held_colors.get()
+        else if (can_grab and hovering.currently)
+            options.hovered_colors.get()
+        else
+            options.inactive_colors.get();
+    rl.drawRectangleRec(rl_rect, bg_color);
+    rl.drawRectangleLinesEx(rl_rect, options.border_thickness, border_color);
+
+    const min_x = rl_rect.x + options.border_thickness + options.padding + options.box_width / 2;
+    const max_x = rl_rect.x + rl_rect.width - options.border_thickness - options.padding - options.box_width / 2;
+
+    const mouse_x: f32 = @floatFromInt(rl.getMouseX());
+    const slider_width = max_x - min_x;
+    const data_width = max - min;
+
+    var result: ?f32 = null;
+    if (holding.currently) {
+        const old_val = value.*;
+        const unclamped_val = (mouse_x - min_x) / slider_width * data_width + min;
+        value.* = math.clamp(unclamped_val, min, max);
+        if (value.* != old_val) {
+            result = value.*;
+        }
+    }
+
+    const box_center_x = if (holding.currently)
+        math.clamp(mouse_x, min_x, max_x)
+    else
+        (value.* - min) / data_width * slider_width + min_x;
+
+    const box: rl.Rectangle = .{
+        .x = box_center_x - options.box_width / 2,
+        .y = rl_rect.y + options.border_thickness + options.padding,
+        .width = options.box_width,
+        .height = rl_rect.height - (options.border_thickness + options.padding) * 2,
+    };
+    rl.drawRectangleRec(box, box_color);
+
+    return if (return_on_change)
+        result
+    else if (holding == g.HoldInfo.released)
+        value.*
+    else
+        null;
+}
+
 pub const Slider = struct {
     rect: Rect,
     data: *Slider.Data,
@@ -19,54 +78,15 @@ pub const Slider = struct {
     }
 
     pub fn drawWithOptions(self: Slider, return_on_change: bool, options: SliderOptions) ?f32 {
-        const rect = self.rect.rlRect();
-        const holding, const hovering, const can_grab = self.grab();
-        const bg_color, const border_color, const box_color =
-            if (holding.currently)
-                options.held_colors.get()
-            else if (can_grab and hovering.currently)
-                options.hovered_colors.get()
-            else
-                options.inactive_colors.get();
-        rl.drawRectangleRec(rect, bg_color);
-        rl.drawRectangleLinesEx(rect, options.border_thickness, border_color);
-
-        const min_x = rect.x + options.border_thickness + options.padding + options.box_width / 2;
-        const max_x = rect.x + rect.width - options.border_thickness - options.padding - options.box_width / 2;
-
-        const mouse_x: f32 = @floatFromInt(rl.getMouseX());
-        const slider_width = max_x - min_x;
-        const data_width = self.data.max - self.data.min;
-
-        var result: ?f32 = null;
-        if (holding.currently) {
-            const old_val = self.data.value;
-            const unclamped_val = (mouse_x - min_x) / slider_width * data_width + self.data.min;
-            self.data.value = math.clamp(unclamped_val, self.data.min, self.data.max);
-            if (self.data.value != old_val) {
-                result = self.data.value;
-            }
-        }
-
-        const box_center_x = if (holding.currently)
-            math.clamp(mouse_x, min_x, max_x)
-        else
-            (self.data.value - self.data.min) / data_width * slider_width + min_x;
-
-        const box: rl.Rectangle = .{
-            .x = box_center_x - options.box_width / 2,
-            .y = rect.y + options.border_thickness + options.padding,
-            .width = options.box_width,
-            .height = rect.height - (options.border_thickness + options.padding) * 2,
-        };
-        rl.drawRectangleRec(box, box_color);
-
-        return if (return_on_change)
-            result
-        else if (holding == g.HoldInfo.released)
-            self.data.value
-        else
-            null;
+        return drawSlider(
+            options,
+            self.rect,
+            self.grab(),
+            self.data.min,
+            self.data.max,
+            &self.data.value,
+            return_on_change,
+        );
     }
 
     pub fn grab(self: Slider) g.InteractionInfo {
