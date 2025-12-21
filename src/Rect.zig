@@ -1,3 +1,4 @@
+const b = @import("backend");
 const rl = @import("raylib");
 
 parent: ?*const Self,
@@ -11,7 +12,13 @@ height: Height,
 const Self = @This();
 
 pub fn rlRect(self: Self) rl.Rectangle {
-    const parent = if (self.parent) |parent| parent.rlRect() else screenRect();
+    const rect = self.vanillaRect();
+    return .init(rect.x, rect.y, rect.width, rect.height);
+}
+
+// TODO: better name for this?
+pub fn vanillaRect(self: Self) b.Rectangle {
+    const parent = if (self.parent) |parent| parent.vanillaRect() else screenRect();
 
     const width = switch (self.width) {
         .amount => |val| val,
@@ -42,12 +49,13 @@ pub fn rlRect(self: Self) rl.Rectangle {
     return .init(x, y, width, height);
 }
 
-fn screenRect() rl.Rectangle {
+fn screenRect() b.Rectangle {
+    const window_size = b.getWindowSize();
     return .{
         .x = 0,
         .y = 0,
-        .width = @floatFromInt(rl.getRenderWidth()),
-        .height = @floatFromInt(rl.getRenderHeight()),
+        .width = window_size.x,
+        .height = window_size.y,
     };
 }
 

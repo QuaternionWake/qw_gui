@@ -23,6 +23,12 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const backend_mod = b.createModule(.{
+        .root_source_file = b.path("src/backend.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
     const rect_mod = b.createModule(.{
         .root_source_file = b.path("src/Rect.zig"),
         .target = target,
@@ -47,10 +53,13 @@ pub fn build(b: *std.Build) void {
     exe_mod.addImport("raylib", rl_mod);
     lib_mod.addImport("raylib", rl_mod);
     lib_mod.addImport("grabbing", grabbing_mod);
+    lib_mod.addImport("backend", backend_mod);
     lib_mod.addImport("Rect", rect_mod);
     lib_mod.addImport("utils", utils_mod);
+    backend_mod.addImport("raylib", rl_mod);
     grabbing_mod.addImport("raylib", rl_mod);
     rect_mod.addImport("raylib", rl_mod);
+    rect_mod.addImport("backend", backend_mod);
 
     const lib = b.addLibrary(.{
         .linkage = .static,

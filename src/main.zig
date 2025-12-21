@@ -13,7 +13,7 @@ pub fn main() !void {
     var counter: u32 = 0;
     var bg_color: rl.Color = .ray_white;
 
-    gui.buttons.default_button_options.font_size = 15;
+    gui.buttons.default_button_options.text_options.size = 15;
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -136,7 +136,7 @@ const slider_b: gui.sliders.Slider = .{
 
 var slider_data: gui.sliders.Slider.Data = .{ .value = 50, .min = -100, .max = 100 };
 
-const greenish: rl.Color = .init(0, 180, 100, 255);
+const greenish: gui.Color = .init(0, 180, 100, 255);
 const green_button_options: gui.buttons.ButtonOptions = .{
     .hovered_colors = .colors(.green, greenish, greenish),
     .held_colors = .colors(greenish, .dark_green, .dark_green),

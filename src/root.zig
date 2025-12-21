@@ -1,5 +1,6 @@
 const std = @import("std");
 const rl = @import("raylib");
+const b = @import("backend");
 
 comptime {
     std.testing.refAllDecls(@import("utils"));
@@ -12,6 +13,8 @@ pub const sliders = @import("elements/sliders.zig");
 pub const inputs = @import("elements/inputs.zig");
 
 pub const grabbing = @import("grabbing");
+
+pub const Color = b.Color;
 
 pub fn updateGuiGlobals() void {
     if (grabbing.held_element) |held| {
