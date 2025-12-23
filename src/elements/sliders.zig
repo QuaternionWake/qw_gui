@@ -1,9 +1,8 @@
 const std = @import("std");
 const math = std.math;
 
-const rl = @import("raylib");
-const Color = rl.Color;
-
+const b = @import("backend");
+const Color = b.Color;
 const g = @import("grabbing");
 const Rect = @import("Rect");
 
@@ -16,7 +15,7 @@ pub fn drawSlider(
     value: *f32,
     return_on_change: bool,
 ) ?f32 {
-    const rl_rect = rect.rlRect();
+    const rect_ = rect.vanillaRect();
     const holding, const hovering, const can_grab = interaction;
     const bg_color, const border_color, const box_color =
         if (holding.currently)
@@ -25,13 +24,13 @@ pub fn drawSlider(
             options.hovered_colors.get()
         else
             options.inactive_colors.get();
-    rl.drawRectangleRec(rl_rect, bg_color);
-    rl.drawRectangleLinesEx(rl_rect, options.border_thickness, border_color);
+    rect_.draw(bg_color);
+    rect_.drawOutline(border_color, options.border_thickness);
 
-    const min_x = rl_rect.x + options.border_thickness + options.padding + options.box_width / 2;
-    const max_x = rl_rect.x + rl_rect.width - options.border_thickness - options.padding - options.box_width / 2;
+    const min_x = rect_.x + options.border_thickness + options.padding + options.box_width / 2;
+    const max_x = rect_.x + rect_.width - options.border_thickness - options.padding - options.box_width / 2;
 
-    const mouse_x: f32 = @floatFromInt(rl.getMouseX());
+    const mouse_x = b.getMousePosition().x;
     const slider_width = max_x - min_x;
     const data_width = max - min;
 
@@ -50,13 +49,13 @@ pub fn drawSlider(
     else
         (value.* - min) / data_width * slider_width + min_x;
 
-    const box: rl.Rectangle = .{
+    const box: b.Rectangle = .{
         .x = box_center_x - options.box_width / 2,
-        .y = rl_rect.y + options.border_thickness + options.padding,
+        .y = rect_.y + options.border_thickness + options.padding,
         .width = options.box_width,
-        .height = rl_rect.height - (options.border_thickness + options.padding) * 2,
+        .height = rect_.height - (options.border_thickness + options.padding) * 2,
     };
-    rl.drawRectangleRec(box, box_color);
+    box.draw(box_color);
 
     return if (return_on_change)
         result
@@ -90,7 +89,7 @@ pub const Slider = struct {
     }
 
     pub fn grab(self: Slider) g.InteractionInfo {
-        if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect())) {
+        if (self.rect.vanillaRect().containsPoint(b.getMousePosition())) {
             g.hoverElement(self.id);
             g.grabElement(self.id);
         }
@@ -110,9 +109,9 @@ pub const SliderOptions = struct {
     border_thickness: f32 = 1,
     padding: f32 = 2,
     box_width: f32 = 10,
-    inactive_colors: Colors = .colors(.ray_white, .light_gray, .sky_blue),
-    hovered_colors: Colors = .colors(.ray_white, .light_gray, .blue),
-    held_colors: Colors = .colors(.ray_white, .light_gray, .dark_blue),
+    inactive_colors: Colors = .colors(.white, .light_gray, .cyan),
+    hovered_colors: Colors = .colors(.white, .light_gray, .blue),
+    held_colors: Colors = .colors(.white, .light_gray, .dark_blue),
 
     const Colors = struct {
         background: Color,
