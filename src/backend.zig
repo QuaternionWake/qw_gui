@@ -63,6 +63,16 @@ pub const Rectangle = struct {
     pub const drawOutline: fn (Rectangle, Color, f32) void = backend.drawRectangleOutline;
 };
 
+pub const MouseButton = enum { left, right, middle };
+
+pub const MouseButtonState = packed struct {
+    currently: bool,
+    previously: bool,
+
+    pub const clicked: MouseButtonState = .{ .currently = true, .previously = false };
+    pub const released: MouseButtonState = .{ .currently = false, .previously = true };
+};
+
 pub const TextOptions = struct {
     font: ?Font = null,
     size: f32 = 10,
@@ -74,6 +84,7 @@ pub const Font = backend.Font;
 
 pub const getWindowSize: fn () Vec2 = backend.getWindowSize;
 pub const getMousePosition: fn () Vec2 = backend.getMousePosition;
+pub const getMouseButtonState: fn (MouseButton) MouseButtonState = backend.getMouseButtonState;
 pub const getDefaultFont: fn () *anyopaque = backend.getDefaultFont;
 pub const drawText: fn (TextOptions, []const u8, Vec2, Color) void = backend.drawText;
 pub const measureText: fn (TextOptions, []const u8) Vec2 = backend.measureText;

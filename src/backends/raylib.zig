@@ -25,6 +25,20 @@ pub fn getMousePosition() b.Vec2 {
     };
 }
 
+pub fn getMouseButtonState(button: b.MouseButton) b.MouseButtonState {
+    const rl_button: rl.MouseButton = switch (button) {
+        .left => .left,
+        .right => .right,
+        .middle => .middle,
+    };
+    const pressed = rl.isMouseButtonPressed(rl_button);
+    const held = rl.isMouseButtonDown(rl_button);
+    return .{
+        .currently = held,
+        .previously = !pressed and held or rl.isMouseButtonReleased(rl_button),
+    };
+}
+
 pub const Font = rl.Font;
 
 pub fn drawText(options: b.TextOptions, text: []const u8, position: b.Vec2, color: b.Color) void {

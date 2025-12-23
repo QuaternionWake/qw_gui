@@ -1,6 +1,5 @@
-const rl = @import("raylib");
-const Color = rl.Color;
-
+const b = @import("backend");
+const Color = b.Color;
 const g = @import("grabbing");
 const Rect = @import("Rect");
 
@@ -8,11 +7,11 @@ pub fn drawDropdown(
     options: DropdownOptions,
     rect: Rect,
     interaction: g.InteractionInfo,
-    items: []const [:0]const u8,
+    items: []const []const u8,
     selected: *usize,
     editing: *bool,
 ) ?usize {
-    const rl_rect = rect.rlRect();
+    const rect_ = rect.vanillaRect();
     const holding, const hovering, const can_grab = interaction;
     const bg_color, const border_color, const text_color =
         if (holding.currently and hovering.currently or editing.*)
@@ -22,50 +21,50 @@ pub fn drawDropdown(
         else
             options.inactive_colors.get();
 
-    rl.drawRectangleRec(rl_rect, bg_color);
-    rl.drawRectangleLinesEx(rl_rect, options.border_thickness, border_color);
+    rect_.draw(bg_color);
+    rect_.drawOutline(border_color, options.border_thickness);
 
     const selected_text = items[selected.*];
-    const text_width = rl.measureText(selected_text, options.font_size);
-    const text_pos: rl.Vector2 = .{
-        .x = rl_rect.x + (rl_rect.width - @as(f32, @floatFromInt(text_width))) / 2,
-        .y = rl_rect.y + (rl_rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
+    const text_size = b.measureText(options.text_options, selected_text);
+    const text_pos: b.Vec2 = .{
+        .x = rect_.x + (rect_.width - text_size.x) / 2,
+        .y = rect_.y + (rect_.height - text_size.y) / 2,
     };
-    rl.drawText(selected_text, @intFromFloat(text_pos.x), @intFromFloat(text_pos.y), options.font_size, text_color);
+    b.drawText(options.text_options, selected_text, text_pos, text_color);
 
     if (holding.currently and hovering.currently) {
-        if (rl.checkCollisionPointRec(rl.getMousePosition(), rl_rect) and rl.isMouseButtonPressed(.left)) {
+        if (holding == g.HoldInfo.grabbed) {
             editing.* = !editing.*;
         }
-    } else if (rl.isMouseButtonPressed(.left)) {
+    } else if (b.getMouseButtonState(.left) == b.MouseButtonState.clicked) {
         editing.* = false;
     }
 
     if (editing.*) {
-        const dropdown_rect = dropdownRect(rl_rect, items.len);
-        rl.drawRectangleRec(dropdown_rect, options.inactive_colors.background);
-        rl.drawRectangleLinesEx(dropdown_rect, options.border_thickness, options.inactive_colors.border);
+        const dropdown_rect = dropdownRect(rect_, items.len);
+        dropdown_rect.draw(options.inactive_colors.background);
+        dropdown_rect.drawOutline(options.inactive_colors.border, options.border_thickness);
 
         var result: ?usize = null;
         for (items, 0..) |item, i| {
-            const item_rect = nthItemRect(rl_rect, i);
-            const item_text_width = rl.measureText(item, options.font_size);
-            const item_text_pos: rl.Vector2 = .{
-                .x = item_rect.x + (item_rect.width - @as(f32, @floatFromInt(item_text_width))) / 2,
-                .y = item_rect.y + (item_rect.height - @as(f32, @floatFromInt(options.font_size))) / 2,
+            const item_rect = nthItemRect(rect_, i);
+            const item_text_size = b.measureText(options.text_options, item);
+            const item_text_pos: b.Vec2 = .{
+                .x = item_rect.x + (item_rect.width - item_text_size.x) / 2,
+                .y = item_rect.y + (item_rect.height - item_text_size.y) / 2,
             };
 
-            const hovering_item = rl.checkCollisionPointRec(rl.getMousePosition(), item_rect);
+            const hovering_item = item_rect.containsPoint(b.getMousePosition());
             if (i == selected.*) {
-                rl.drawRectangleRec(item_rect, options.held_colors.background);
-                rl.drawRectangleLinesEx(item_rect, options.border_thickness, options.held_colors.border);
-                rl.drawText(item, @intFromFloat(item_text_pos.x), @intFromFloat(item_text_pos.y), options.font_size, options.held_colors.text);
+                item_rect.draw(options.held_colors.background);
+                item_rect.drawOutline(options.held_colors.border, options.border_thickness);
+                b.drawText(options.text_options, item, item_text_pos, options.held_colors.text);
             } else if (can_grab and hovering_item) {
-                rl.drawRectangleRec(item_rect, options.hovered_colors.background);
-                rl.drawRectangleLinesEx(item_rect, options.border_thickness, options.hovered_colors.border);
-                rl.drawText(item, @intFromFloat(item_text_pos.x), @intFromFloat(item_text_pos.y), options.font_size, options.hovered_colors.text);
+                item_rect.draw(options.hovered_colors.background);
+                item_rect.drawOutline(options.hovered_colors.border, options.border_thickness);
+                b.drawText(options.text_options, item, item_text_pos, options.hovered_colors.text);
             } else {
-                rl.drawText(item, @intFromFloat(item_text_pos.x), @intFromFloat(item_text_pos.y), options.font_size, options.inactive_colors.text);
+                b.drawText(options.text_options, item, item_text_pos, options.inactive_colors.text);
             }
 
             if (hovering.currently and holding == g.HoldInfo.released and hovering_item) {
@@ -79,20 +78,20 @@ pub fn drawDropdown(
     return null;
 }
 
-fn fullRect(rect: rl.Rectangle, len: usize) rl.Rectangle {
+fn fullRect(rect: b.Rectangle, len: usize) b.Rectangle {
     var result = rect;
     result.height *= @floatFromInt(len + 1);
     return result;
 }
 
-fn dropdownRect(rect: rl.Rectangle, len: usize) rl.Rectangle {
+fn dropdownRect(rect: b.Rectangle, len: usize) b.Rectangle {
     var result = rect;
     result.y += result.height;
     result.height *= @floatFromInt(len);
     return result;
 }
 
-fn nthItemRect(rect: rl.Rectangle, n: usize) rl.Rectangle {
+fn nthItemRect(rect: b.Rectangle, n: usize) b.Rectangle {
     var result = rect;
     result.y += result.height * @as(f32, @floatFromInt(n + 1));
     return result;
@@ -100,7 +99,7 @@ fn nthItemRect(rect: rl.Rectangle, n: usize) rl.Rectangle {
 
 pub const Dropdown = struct {
     rect: Rect,
-    items: []const [:0]const u8,
+    items: []const []const u8,
     data: *Dropdown.Data,
     id: []const u8,
 
@@ -120,8 +119,8 @@ pub const Dropdown = struct {
     }
 
     pub fn grab(self: Dropdown) g.InteractionInfo {
-        if (rl.checkCollisionPointRec(rl.getMousePosition(), self.rect.rlRect()) or
-            self.data.editing and rl.checkCollisionPointRec(rl.getMousePosition(), fullRect(self.rect.rlRect(), self.items.len)))
+        if (self.rect.vanillaRect().containsPoint(b.getMousePosition()) or
+            self.data.editing and fullRect(self.rect.vanillaRect(), self.items.len).containsPoint(b.getMousePosition()))
         {
             g.hoverElement(self.id);
             g.grabElement(self.id);
@@ -138,10 +137,10 @@ pub const Dropdown = struct {
 pub var default_dropdown_options: DropdownOptions = .{};
 
 pub const DropdownOptions = struct {
-    font_size: i32 = 10, // TODO: Consider changing this to u32
+    text_options: b.TextOptions = .{},
     border_thickness: f32 = 5,
     inactive_colors: Colors = .colors(.light_gray, .gray, .gray),
-    hovered_colors: Colors = .colors(.sky_blue, .blue, .blue),
+    hovered_colors: Colors = .colors(.cyan, .blue, .blue),
     held_colors: Colors = .colors(.blue, .dark_blue, .dark_blue),
 
     const Colors = struct {
