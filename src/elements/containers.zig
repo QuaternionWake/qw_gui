@@ -1,22 +1,21 @@
-const rl = @import("raylib");
-const Color = rl.Color;
-
+const b = @import("backend");
+const Color = b.Color;
 const g = @import("grabbing");
 const Rect = @import("Rect");
 
 pub const Panel = struct {
     rect: Rect,
-    title: ?[:0]const u8,
+    title: ?[]const u8,
 
     pub fn draw(self: Panel) void {
         self.drawWithOptions(default_panel_options);
     }
 
     pub fn drawWithOptions(self: Panel, options: PanelOptions) void {
-        const rect = self.rect.rlRect();
+        const rect = self.rect.vanillaRect();
 
-        rl.drawRectangleRec(rect, options.colors.background);
-        rl.drawRectangleLinesEx(rect, options.border_thickness, options.colors.border);
+        rect.draw(options.colors.background);
+        rect.drawOutline(options.colors.border, options.border_thickness);
 
         if (self.title) |title| {
             const bar_rect = blk: {
@@ -25,12 +24,14 @@ pub const Panel = struct {
                 break :blk bar_rect;
             };
 
-            rl.drawRectangleRec(bar_rect, options.colors.bar);
-            rl.drawRectangleLinesEx(bar_rect, options.border_thickness, options.colors.border);
+            bar_rect.draw(options.colors.bar);
+            bar_rect.drawOutline(options.colors.border, options.border_thickness);
 
-            const text_x = bar_rect.x + 3;
-            const text_y = bar_rect.y + (bar_rect.height - @as(f32, @floatFromInt(options.font_size))) / 2;
-            rl.drawText(title, @intFromFloat(text_x), @intFromFloat(text_y), options.font_size, options.colors.text);
+            const text_pos: b.Vec2 = .{
+                .x = bar_rect.x + 3,
+                .y = bar_rect.y + (bar_rect.height - options.text_options.size) / 2,
+            };
+            b.drawText(options.text_options, title, text_pos, options.colors.text);
         }
     }
 };
@@ -38,9 +39,9 @@ pub const Panel = struct {
 pub var default_panel_options: PanelOptions = .{};
 
 pub const PanelOptions = struct {
-    font_size: i32 = 10, // TODO: Consider changing this to u32
+    text_options: b.TextOptions = .{},
     border_thickness: f32 = 2,
-    colors: Colors = .colors(.ray_white, .light_gray, .gray, .gray),
+    colors: Colors = .colors(.white, .light_gray, .gray, .gray),
 
     const Colors = struct {
         background: Color,
@@ -59,46 +60,48 @@ pub const PanelOptions = struct {
 
 pub const GroupBox = struct {
     rect: Rect,
-    title: ?[:0]const u8,
+    title: ?[]const u8,
 
     pub fn draw(self: GroupBox) void {
         self.drawWithOptions(default_groupbox_options);
     }
 
     pub fn drawWithOptions(self: GroupBox, options: GroupBoxOptions) void {
-        const rect = self.rect.rlRect();
-        const left_edge: rl.Rectangle = .{
+        const rect = self.rect.vanillaRect();
+        const left_edge: b.Rectangle = .{
             .x = rect.x,
             .y = rect.y,
             .width = options.border_thickness,
             .height = rect.height,
         };
-        const right_edge: rl.Rectangle = .{
+        const right_edge: b.Rectangle = .{
             .x = rect.x + rect.width - options.border_thickness,
             .y = rect.y,
             .width = options.border_thickness,
             .height = rect.height,
         };
-        const bottom_edge: rl.Rectangle = .{
+        const bottom_edge: b.Rectangle = .{
             .x = rect.x + options.border_thickness,
             .y = rect.y + rect.height - options.border_thickness,
             .width = rect.width - 2 * options.border_thickness,
             .height = options.border_thickness,
         };
-        const top_edge: rl.Rectangle = .{
+        const top_edge: b.Rectangle = .{
             .x = rect.x + options.border_thickness,
             .y = rect.y,
             .width = rect.width - 2 * options.border_thickness,
             .height = options.border_thickness,
         };
 
-        rl.drawRectangleRec(left_edge, options.colors.border);
-        rl.drawRectangleRec(right_edge, options.colors.border);
-        rl.drawRectangleRec(bottom_edge, options.colors.border);
+        left_edge.draw(options.colors.border);
+        right_edge.draw(options.colors.border);
+        bottom_edge.draw(options.colors.border);
 
         if (self.title) |title| {
-            const text_x = rect.x + options.border_thickness + 10;
-            const text_y = rect.y + (options.border_thickness - @as(f32, @floatFromInt(options.font_size))) / 2;
+            const text_pos: b.Vec2 = .{
+                .x = rect.x + options.border_thickness + 10,
+                .y = rect.y + (options.border_thickness - options.text_options.size) / 2,
+            };
             const top_left_edge = blk: {
                 var top_left_edge = top_edge;
                 top_left_edge.width = 5;
@@ -106,16 +109,16 @@ pub const GroupBox = struct {
             };
             const top_right_edge = blk: {
                 var top_right_edge = top_edge;
-                const text_width = rl.measureText(title, options.font_size);
-                top_right_edge.x += @floatFromInt(10 + text_width + 5);
-                top_right_edge.width -= @floatFromInt(10 + text_width + 5);
+                const text_width = b.measureText(options.text_options, title).x;
+                top_right_edge.x += 10 + text_width + 5;
+                top_right_edge.width -= 10 + text_width + 5;
                 break :blk top_right_edge;
             };
-            rl.drawText(title, @intFromFloat(text_x), @intFromFloat(text_y), options.font_size, options.colors.text);
-            rl.drawRectangleRec(top_right_edge, options.colors.border);
-            rl.drawRectangleRec(top_left_edge, options.colors.border);
+            b.drawText(options.text_options, title, text_pos, options.colors.text);
+            top_right_edge.draw(options.colors.border);
+            top_left_edge.draw(options.colors.border);
         } else {
-            rl.drawRectangleRec(top_edge, options.colors.border);
+            top_edge.draw(options.colors.border);
         }
     }
 };
@@ -123,7 +126,7 @@ pub const GroupBox = struct {
 pub var default_groupbox_options: GroupBoxOptions = .{};
 
 pub const GroupBoxOptions = struct {
-    font_size: i32 = 10, // TODO: Consider changing this to u32
+    text_options: b.TextOptions = .{},
     border_thickness: f32 = 2,
     colors: Colors = .colors(.gray, .gray),
 
