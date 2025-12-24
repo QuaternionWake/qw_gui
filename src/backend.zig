@@ -88,3 +88,5 @@ pub const getMouseButtonState: fn (MouseButton) MouseButtonState = backend.getMo
 pub const getDefaultFont: fn () *anyopaque = backend.getDefaultFont;
 pub const drawText: fn (TextOptions, []const u8, Vec2, Color) void = backend.drawText;
 pub const measureText: fn (TextOptions, []const u8) Vec2 = backend.measureText;
+pub const longestFittingSubstring: fn (TextOptions, []const u8, f32) struct { []const u8, f32 } = backend.longestFittingSubstring;
+pub const lastLongestFittingSubstring: fn (TextOptions, []const u8, f32) struct { []const u8, f32 } = backend.lastLongestFittingSubstring;

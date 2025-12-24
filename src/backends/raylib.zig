@@ -94,6 +94,51 @@ pub fn measureText(options: b.TextOptions, text: []const u8) b.Vec2 {
     return size;
 }
 
+pub fn longestFittingSubstring(options: b.TextOptions, text: []const u8, max_width: f32) struct { []const u8, f32 } {
+    const font = options.font orelse rl.getFontDefault() catch unreachable; // TODO: handle failure better
+    const scale_factor = options.size / @as(f32, @floatFromInt(font.baseSize));
+    var width: f32 = 0;
+
+    // TODO: unicode
+    for (text, 0..) |char, i| {
+        const idx: usize = @intCast(rl.getGlyphIndex(font, char));
+        const char_width: f32 =
+            if (font.glyphs[idx].advanceX == 0)
+                font.recs[idx].width
+            else
+                @floatFromInt(font.glyphs[idx].advanceX);
+        width += char_width * scale_factor + options.character_spacing;
+        if (width - options.character_spacing > max_width) {
+            return .{ text[0..i], width - options.character_spacing };
+        }
+    }
+
+    return .{ text, width - options.character_spacing };
+}
+
+pub fn lastLongestFittingSubstring(options: b.TextOptions, text: []const u8, max_width: f32) struct { []const u8, f32 } {
+    const font = options.font orelse rl.getFontDefault() catch unreachable; // TODO: handle failure better
+    const scale_factor = options.size / @as(f32, @floatFromInt(font.baseSize));
+    var width: f32 = 0;
+
+    // TODO: unicode
+    for (1..text.len + 1) |i| {
+        const char = text[text.len - i];
+        const idx: usize = @intCast(rl.getGlyphIndex(font, char));
+        const char_width: f32 =
+            if (font.glyphs[idx].advanceX == 0)
+                font.recs[idx].width
+            else
+                @floatFromInt(font.glyphs[idx].advanceX);
+        width += char_width * scale_factor + options.character_spacing;
+        if (width - options.character_spacing > max_width) {
+            return .{ text[text.len - i ..], width - options.character_spacing };
+        }
+    }
+
+    return .{ text, width - options.character_spacing };
+}
+
 fn toRlColor(color: b.Color) rl.Color {
     return .{
         .r = color.r,

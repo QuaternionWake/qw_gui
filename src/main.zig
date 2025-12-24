@@ -46,12 +46,18 @@ pub fn main() !void {
         }
         rl.drawText(rl.textFormat("%d", .{counter}), 295, 100, 20, .black);
 
-        if (step_up_input.draw(false)) |val| {
-            rl.drawText(rl.textFormat("%d", .{val}), 160, 175, 10, .black);
-        }
+        // if (step_up_input.draw(false)) |val| {
+        //     rl.drawText(rl.textFormat("%d", .{val}), 160, 175, 10, .black);
+        // }
 
-        if (step_down_input.draw(true)) |val| {
-            rl.drawText(rl.textFormat("%d", .{val}), 160, 275, 10, .black);
+        // if (step_down_input.draw(true)) |val| {
+        //     rl.drawText(rl.textFormat("%d", .{val}), 160, 275, 10, .black);
+        // }
+
+        if (text_input.draw(true)) |val| {
+            var buf: [129]u8 = undefined;
+            const text = std.fmt.bufPrintZ(&buf, "{s}", .{val}) catch unreachable;
+            rl.drawText(text, 250, 350, 10, .black);
         }
 
         if (slider_a.draw(true)) |_| {
@@ -204,3 +210,23 @@ var step_down_data: gui.inputs.ValueInput(u32).Data = .{
     .min = 1,
     .max = 1_000_000,
 };
+
+const text_input: gui.inputs.TextInput = .{
+    .rect = .{
+        .parent = &panel.rect,
+        .x = .{ .middle = 0 },
+        .y = .{ .bottom = 50 },
+        .width = .{ .amount = 100 },
+        .height = .{ .amount = 20 },
+    },
+    .data = &text_data,
+    .id = "text_input",
+};
+
+var text_data: gui.inputs.TextInput.Data = .{
+    .buffer = &text_input_bufer,
+    .text_len = 0,
+    .editing = false,
+};
+
+var text_input_bufer: [128]u8 = undefined;
