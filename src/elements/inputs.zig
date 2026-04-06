@@ -55,15 +55,15 @@ pub fn drawTextInput(
     };
     if (editing.*) editing: {
         // TODO: support for moving the cursor
-        // TODO: cursor sometimes draws slightly outside box
-        const substring, const text_width = b.lastLongestFittingSubstring(text_options, text, max_text_width);
+        const max_text_width_ = max_text_width - options.cursor_width - options.cursor_padding;
+        const substring, const text_width = b.lastLongestFittingSubstring(text_options, text, max_text_width_);
         const text_pos: b.Vec2 = .{
-            .x = text_rect.x + (text_rect.width - text_width) / 2,
+            .x = text_rect.x + (text_rect.width - text_width - options.cursor_width - options.cursor_padding) / 2,
             .y = text_rect.y,
         };
         b.drawText(text_options, substring, text_pos, text_color);
         const cursor_rect: b.Rectangle = .{
-            .x = text_pos.x + text_width,
+            .x = text_pos.x + text_width + options.cursor_padding,
             .y = text_pos.y,
             .width = options.cursor_width,
             .height = text_options.size,
@@ -354,6 +354,7 @@ pub const InputFieldOptions = struct {
     border_thickness: f32 = 1,
     padding: f32 = 2,
     cursor_width: f32 = 3,
+    cursor_padding: f32 = 1,
     inactive_colors: Colors = .colors(.white, .gray, .gray, .blue),
     hovered_colors: Colors = .colors(.white, .blue, .gray, .blue),
     held_colors: Colors = .colors(.init(0, 230, 255, 255), .blue, .gray, .blue),

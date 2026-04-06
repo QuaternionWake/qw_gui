@@ -99,8 +99,21 @@ pub fn longestFittingSubstring(options: b.TextOptions, text: []const u8, max_wid
     const scale_factor = options.size / @as(f32, @floatFromInt(font.baseSize));
     var width: f32 = 0;
 
+    if (text.len != 0) {
+        const idx: usize = @intCast(rl.getGlyphIndex(font, text[0]));
+        const char_width: f32 =
+            if (font.glyphs[idx].advanceX == 0)
+                font.recs[idx].width
+            else
+                @floatFromInt(font.glyphs[idx].advanceX);
+        width += char_width * scale_factor;
+        if (width > max_width) {
+            return .{ text[0..0], 0 };
+        }
+    } else return .{ text[0..0], 0 };
+
     // TODO: unicode
-    for (text, 0..) |char, i| {
+    for (text[1..], 1..) |char, i| {
         const idx: usize = @intCast(rl.getGlyphIndex(font, char));
         const char_width: f32 =
             if (font.glyphs[idx].advanceX == 0)
@@ -108,12 +121,12 @@ pub fn longestFittingSubstring(options: b.TextOptions, text: []const u8, max_wid
             else
                 @floatFromInt(font.glyphs[idx].advanceX);
         width += char_width * scale_factor + options.character_spacing;
-        if (width - options.character_spacing > max_width) {
-            return .{ text[0..i], width - options.character_spacing };
+        if (width > max_width) {
+            return .{ text[0..i], width - char_width * scale_factor - options.character_spacing };
         }
     }
 
-    return .{ text, width - options.character_spacing };
+    return .{ text, width };
 }
 
 pub fn lastLongestFittingSubstring(options: b.TextOptions, text: []const u8, max_width: f32) struct { []const u8, f32 } {
@@ -121,8 +134,21 @@ pub fn lastLongestFittingSubstring(options: b.TextOptions, text: []const u8, max
     const scale_factor = options.size / @as(f32, @floatFromInt(font.baseSize));
     var width: f32 = 0;
 
+    if (text.len != 0) {
+        const idx: usize = @intCast(rl.getGlyphIndex(font, text[text.len - 1]));
+        const char_width: f32 =
+            if (font.glyphs[idx].advanceX == 0)
+                font.recs[idx].width
+            else
+                @floatFromInt(font.glyphs[idx].advanceX);
+        width += char_width * scale_factor;
+        if (width > max_width) {
+            return .{ text[0..0], 0 };
+        }
+    } else return .{ text[0..0], 0 };
+
     // TODO: unicode
-    for (1..text.len + 1) |i| {
+    for (2..text.len + 1) |i| {
         const char = text[text.len - i];
         const idx: usize = @intCast(rl.getGlyphIndex(font, char));
         const char_width: f32 =
@@ -131,12 +157,12 @@ pub fn lastLongestFittingSubstring(options: b.TextOptions, text: []const u8, max
             else
                 @floatFromInt(font.glyphs[idx].advanceX);
         width += char_width * scale_factor + options.character_spacing;
-        if (width - options.character_spacing > max_width) {
-            return .{ text[text.len - i ..], width - options.character_spacing };
+        if (width > max_width) {
+            return .{ text[text.len - i + 1 ..], width - char_width * scale_factor - options.character_spacing };
         }
     }
 
-    return .{ text, width - options.character_spacing };
+    return .{ text, width };
 }
 
 fn toRlColor(color: b.Color) rl.Color {
