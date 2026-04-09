@@ -1,4 +1,10 @@
+const std = @import("std");
+
 const backend = @import("backends/raylib.zig");
+
+comptime {
+    std.testing.refAllDecls(Color);
+}
 
 pub const Color = struct {
     r: u8,
@@ -6,13 +12,95 @@ pub const Color = struct {
     b: u8,
     a: u8,
 
-    pub fn init(r: u8, g: u8, b: u8, a: u8) Color {
-        return .{
-            .r = r,
-            .g = g,
-            .b = b,
-            .a = a,
-        };
+    pub fn fromRgba(r: u8, g: u8, b: u8, a: u8) Color {
+        return .{ .r = r, .g = g, .b = b, .a = a };
+    }
+
+    /// Alpha is set to 255
+    pub fn fromRgb(r: u8, g: u8, b: u8) Color {
+        return .{ .r = r, .g = g, .b = b, .a = 255 };
+    }
+
+    /// Interprets int as RGBA
+    pub fn fromIntRgba(int: u32) Color {
+        const bytes = std.mem.asBytes(&int);
+        if (@import("builtin").cpu.arch.endian() == .little) {
+            return .{ .r = bytes[3], .g = bytes[2], .b = bytes[1], .a = bytes[0] };
+        } else {
+            return .{ .r = bytes[0], .g = bytes[1], .b = bytes[2], .a = bytes[3] };
+        }
+    }
+
+    /// Interprets int as RGB, alpha is set to 255
+    pub fn fromIntRgb(int: u24) Color {
+        return fromIntRgba(@as(u32, @intCast(int)) << 8 | 0xFF);
+    }
+
+    /// Parses hex string into a `Color`
+    /// String can be 3, 4, 6, or 8 characters long, with an optional "0x" prefix
+    ///
+    /// The way strings are parsed, by length:
+    ///   * 8 - Parsed as RGBA
+    ///   * 6 - Parsed as RGB, A is set to 255
+    ///   * 4 - Parsed as RGBA, each character is treated as if it repeated twice
+    ///   * 3 - Parsed as RGB, each character is treated as if it repeated twice, A is set to 255
+    pub fn fromHex(string: []const u8) Color {
+        const string_ = if (std.mem.startsWith(u8, string, "0x")) string[2..] else string;
+        switch (string_.len) {
+            inline 3, 4, 6, 8 => |len| {
+                const vec: @Vector(len, u8) = string_[0..len].*;
+                const isDigit = @intFromBool((vec >= @as(@Vector(len, u8), @splat('0'))) & (vec <= @as(@Vector(len, u8), @splat('9'))));
+                const isHexLower = @intFromBool((vec >= @as(@Vector(len, u8), @splat('a'))) & (vec <= @as(@Vector(len, u8), @splat('f'))));
+                const isHexUpper = @intFromBool((vec >= @as(@Vector(len, u8), @splat('A'))) & (vec <= @as(@Vector(len, u8), @splat('F'))));
+                const subs = (@as(@Vector(len, u8), @splat('0')) * isDigit) | (@as(@Vector(len, u8), @splat(('a' - 10))) * isHexLower) | (@as(@Vector(len, u8), @splat(('A' - 10))) * isHexUpper);
+                const nibbles = vec - subs;
+
+                return switch (len) {
+                    3 => .{
+                        .r = nibbles[0] << 4 | nibbles[0],
+                        .g = nibbles[1] << 4 | nibbles[1],
+                        .b = nibbles[2] << 4 | nibbles[2],
+                        .a = 255,
+                    },
+                    4 => .{
+                        .r = nibbles[0] << 4 | nibbles[0],
+                        .g = nibbles[1] << 4 | nibbles[1],
+                        .b = nibbles[2] << 4 | nibbles[2],
+                        .a = nibbles[3] << 4 | nibbles[3],
+                    },
+                    6 => .{
+                        .r = nibbles[0] << 4 | nibbles[1],
+                        .g = nibbles[2] << 4 | nibbles[3],
+                        .b = nibbles[4] << 4 | nibbles[5],
+                        .a = 255,
+                    },
+                    8 => .{
+                        .r = nibbles[0] << 4 | nibbles[1],
+                        .g = nibbles[2] << 4 | nibbles[3],
+                        .b = nibbles[4] << 4 | nibbles[5],
+                        .a = nibbles[6] << 4 | nibbles[7],
+                    },
+                    else => comptime unreachable,
+                };
+            },
+            else => unreachable,
+        }
+    }
+
+    test "Colors" {
+        const t = std.testing;
+
+        try t.expectEqual(Color.fromRgba(0xFF, 0x88, 0x44, 0x22), Color.fromIntRgba(0xff884422));
+        try t.expectEqual(Color.fromRgba(0xFF, 0x88, 0x44, 0xFF), Color.fromIntRgb(0xff8844));
+
+        try t.expectEqual(Color.fromRgba(0x87, 0x65, 0x43, 0x21), Color.fromHex("0x87654321"));
+        try t.expectEqual(Color.fromRgba(0x87, 0x65, 0x43, 0xFF), Color.fromHex("0x876543"));
+        try t.expectEqual(Color.fromRgba(0x88, 0x44, 0x22, 0x11), Color.fromHex("0x8421"));
+        try t.expectEqual(Color.fromRgba(0x88, 0x44, 0x22, 0xFF), Color.fromHex("0x842"));
+        try t.expectEqual(Color.fromRgba(0x87, 0x65, 0x43, 0x21), Color.fromHex("87654321"));
+        try t.expectEqual(Color.fromRgba(0x87, 0x65, 0x43, 0xFF), Color.fromHex("876543"));
+        try t.expectEqual(Color.fromRgba(0x88, 0x44, 0x22, 0x11), Color.fromHex("8421"));
+        try t.expectEqual(Color.fromRgba(0x88, 0x44, 0x22, 0xFF), Color.fromHex("842"));
     }
 
     // TODO: godawful colors, do better
