@@ -41,6 +41,10 @@ pub fn getMouseButtonState(button: b.MouseButton) b.MouseButtonState {
 
 pub const Font = rl.Font;
 
+pub fn getDefaultFont() ?Font {
+    return rl.getFontDefault() catch null;
+}
+
 pub fn drawText(options: b.TextOptions, text: []const u8, position: b.Vec2, color: b.Color) void {
     const rl_color = toRlColor(color);
     const font = options.font orelse rl.getFontDefault() catch unreachable; // TODO: handle failure better
