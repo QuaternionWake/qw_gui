@@ -66,8 +66,8 @@ pub const ButtonOptions = struct {
     text_options: b.TextOptions = .{},
     border_thickness: f32 = 5,
     inactive_colors: Colors = .colors(.light_gray, .gray, .gray),
-    hovered_colors: Colors = .colors(.cyan, .blue, .blue),
-    held_colors: Colors = .colors(.blue, .dark_blue, .dark_blue),
+    hovered_colors: Colors = .colors(.light_cyan, .dark_cyan, .dark_cyan),
+    held_colors: Colors = .colors(.cyan, .darker_cyan, .darker_cyan),
 
     const Colors = struct {
         background: Color,

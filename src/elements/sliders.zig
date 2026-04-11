@@ -109,9 +109,9 @@ pub const SliderOptions = struct {
     border_thickness: f32 = 1,
     padding: f32 = 2,
     box_width: f32 = 10,
-    inactive_colors: Colors = .colors(.white, .light_gray, .cyan),
-    hovered_colors: Colors = .colors(.white, .light_gray, .blue),
-    held_colors: Colors = .colors(.white, .light_gray, .dark_blue),
+    inactive_colors: Colors = .colors(.white, .light_gray, .light_cyan),
+    hovered_colors: Colors = .colors(.white, .light_gray, .cyan),
+    held_colors: Colors = .colors(.white, .light_gray, .darker_cyan),
 
     const Colors = struct {
         background: Color,
