@@ -54,11 +54,9 @@ const decrement_button: gui.buttons.Button = .{
     .id = "decrement_button",
 };
 
-const bright_red: rl.Color = .init(255, 100, 90, 255);
-const dark_red: rl.Color = .init(160, 10, 10, 255);
 const decrement_button_options: gui.buttons.ButtonOptions = .{
-    .hovered_colors = .colors(bright_red, .red, .red),
-    .held_colors = .colors(.red, .maroon, dark_red),
+    .hovered_colors = .colors(.light_red, .dark_red, .dark_red),
+    .held_colors = .colors(.red, .darker_red, .dark_red),
 };
 
 const reset_button: gui.buttons.Button = .{

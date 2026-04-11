@@ -142,10 +142,9 @@ const slider_b: gui.sliders.Slider = .{
 
 var slider_data: gui.sliders.Slider.Data = .{ .value = 50, .min = -100, .max = 100 };
 
-const greenish: gui.Color = .init(0, 180, 100, 255);
 const green_button_options: gui.buttons.ButtonOptions = .{
-    .hovered_colors = .colors(.green, greenish, greenish),
-    .held_colors = .colors(greenish, .dark_green, .dark_green),
+    .hovered_colors = .colors(.green, .dark_green, .dark_green),
+    .held_colors = .colors(.pale_green, .dark_pale_green, .dark_pale_green),
 };
 
 const test_dropdown: gui.dropdowns.Dropdown = .{
