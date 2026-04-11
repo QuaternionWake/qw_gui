@@ -33,7 +33,7 @@ pub fn drawDropdown(
     b.drawText(options.text_options, selected_text, text_pos, text_color);
 
     if (holding.currently and hovering.currently) {
-        if (holding == g.HoldInfo.grabbed) {
+        if (holding == g.HoldInfo.grabbed and rect_.containsPoint(b.getMousePosition())) {
             editing.* = !editing.*;
         }
     } else if (b.getMouseButtonState(.left) == b.MouseButtonState.clicked) {
