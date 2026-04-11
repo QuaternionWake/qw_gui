@@ -357,7 +357,7 @@ pub const InputFieldOptions = struct {
     cursor_padding: f32 = 1,
     inactive_colors: Colors = .colors(.white, .gray, .gray, .blue),
     hovered_colors: Colors = .colors(.white, .blue, .gray, .blue),
-    held_colors: Colors = .colors(.init(0, 230, 255, 255), .blue, .gray, .blue),
+    held_colors: Colors = .colors(.light_cyan, .blue, .gray, .blue),
 
     const Colors = struct {
         background: Color,

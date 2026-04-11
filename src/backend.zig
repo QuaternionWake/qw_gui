@@ -103,20 +103,97 @@ pub const Color = struct {
         try t.expectEqual(Color.fromRgba(0x88, 0x44, 0x22, 0xFF), Color.fromHex("842"));
     }
 
-    // TODO: godawful colors, do better
     // zig fmt: off
-    pub const      white: Color = init(255, 255, 255, 255);
-    pub const light_gray: Color = init(172, 172, 172, 255);
-    pub const       gray: Color = init(128, 128, 128, 255);
-    pub const  dark_gray: Color = init(78, 78, 78, 255);
-    pub const      black: Color = init(0, 0, 0, 255);
+    // Hex colors
+    pub const   hex_white: Color = .fromRgb(255, 255, 255);
+    pub const    hex_gray: Color = .fromRgb(128, 128, 128);
+    pub const   hex_black: Color = .fromRgb(  0,   0,   0);
 
-    pub const      green: Color = init(0, 255, 0, 255);
-    pub const dark_green: Color = init(0, 128, 0, 255);
+    pub const     hex_red: Color = .fromRgb(255,   0,   0);
+    pub const   hex_green: Color = .fromRgb(  0, 255,   0);
+    pub const    hex_blue: Color = .fromRgb(  0,   0, 255);
 
-    pub const       blue: Color = init(0, 0, 255, 255);
-    pub const  dark_blue: Color = init(0, 0, 128, 255);
-    pub const       cyan: Color = init(0, 255, 255, 255);
+    pub const    hex_cyan: Color = .fromRgb(  0, 255, 255);
+    pub const hex_magenta: Color = .fromRgb(255,   0, 255);
+    pub const  hex_yellow: Color = .fromRgb(255, 255,   0);
+
+    // Normal colors
+    pub const darker_magenta: Color = .fromIntRgb(0x6d0c5d);
+    pub const   dark_magenta: Color = .fromIntRgb(0x9a087f);
+    pub const        magenta: Color = .fromIntRgb(0xd40caf);
+    pub const  light_magenta: Color = .fromIntRgb(0xf318e8);
+
+    pub const  darker_red: Color = .fromIntRgb(0x51010c);
+    pub const    dark_red: Color = .fromIntRgb(0x720312);
+    pub const         red: Color = .fromIntRgb(0xc40720);
+    pub const   light_red: Color = .fromIntRgb(0xe2041e);
+    pub const lighter_red: Color = .fromIntRgb(0xef324e);
+    pub const        pink: Color = .fromIntRgb(0xfc83d6);
+
+    pub const reddish_orange: Color = .fromIntRgb(0xff5117);
+
+    pub const   dark_brown: Color = .fromIntRgb(0x512b00);
+    pub const        brown: Color = .fromIntRgb(0x713e00);
+    pub const  light_brown: Color = .fromIntRgb(0x9a4902);
+    pub const  dark_orange: Color = .fromIntRgb(0xb75805);
+    pub const       orange: Color = .fromIntRgb(0xff8f1e);
+    pub const light_orange: Color = .fromIntRgb(0xffa411);
+
+    pub const yellowish_orange: Color = .fromIntRgb(0xffd11a);
+
+    pub const  dark_yellow: Color = .fromIntRgb(0xe2cb1a);
+    pub const       yellow: Color = .fromIntRgb(0xffea03);
+    pub const light_yellow: Color = .fromIntRgb(0xfffa73);
+
+    pub const  dark_pale_green: Color = .fromIntRgb(0x4d862a);
+    pub const       pale_green: Color = .fromIntRgb(0x75d918);
+    pub const light_pale_green: Color = .fromIntRgb(0xa1d159);
+    pub const             lime: Color = .fromIntRgb(0x8cff08);
+
+    pub const darkest_green: Color = .fromIntRgb(0x124a0b);
+    pub const  darker_green: Color = .fromIntRgb(0x1d7d13);
+    pub const    dark_green: Color = .fromIntRgb(0x22b433);
+    pub const         green: Color = .fromIntRgb(0x2be716);
+    pub const   light_green: Color = .fromIntRgb(0x25ff03);
+
+    pub const dark_greenish_cyan: Color = .fromIntRgb(0x1db187);
+    pub const      greenish_cyan: Color = .fromIntRgb(0x17f0af);
+
+    pub const darkest_cyan: Color = .fromIntRgb(0x165050);
+    pub const  darker_cyan: Color = .fromIntRgb(0x207475);
+    pub const    dark_cyan: Color = .fromIntRgb(0x158f91);
+    pub const         cyan: Color = .fromIntRgb(0x12b3b3);
+    pub const   light_cyan: Color = .fromIntRgb(0x15d9d9);
+    pub const lighter_cyan: Color = .fromIntRgb(0x0df1de);
+
+    pub const  dark_asdf: Color = .fromIntRgb(0x09679e);
+    pub const       asdf: Color = .fromIntRgb(0x0c87d4);
+    pub const light_asdf: Color = .fromIntRgb(0x02a6ff);
+
+    pub const darker_blue: Color = .fromIntRgb(0x0e116d);
+    pub const   dark_blue: Color = .fromIntRgb(0x0e19b6);
+    pub const        blue: Color = .fromIntRgb(0x1751f0);
+
+    pub const indgo: Color = .fromIntRgb(0x460af9);
+
+    pub const darker_purple: Color = .fromIntRgb(0x2a0e5f);
+    pub const   dark_purple: Color = .fromIntRgb(0x431696);
+    pub const        purple: Color = .fromIntRgb(0x6100f3);
+
+    pub const       purpleish_magenta: Color = .fromIntRgb(0xa913f4);
+    pub const light_purpleish_magenta: Color = .fromIntRgb(0xd70cff);
+
+    // Whites, blacks. greys
+    pub const warm_white: Color = .fromIntRgb(0xfffcf8);
+    pub const      cream: Color = .fromIntRgb(0xfff8f4);
+
+    pub const        black: Color = .fromIntRgb(0x1d1d1d);
+    pub const  darker_gray: Color = .fromIntRgb(0x404050);
+    pub const    dark_gray: Color = .fromIntRgb(0x5c5c6c);
+    pub const         gray: Color = .fromIntRgb(0x808090);
+    pub const   light_gray: Color = .fromIntRgb(0xc0c0d0);
+    pub const lighter_gray: Color = .fromIntRgb(0xe0e0f0);
+    pub const        white: Color = .fromIntRgb(0xf4f4ff);
     // zig fmt: on
 };
 
