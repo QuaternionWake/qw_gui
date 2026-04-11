@@ -156,8 +156,9 @@ pub const Color = struct {
     pub const         green: Color = .fromIntRgb(0x2be716);
     pub const   light_green: Color = .fromIntRgb(0x25ff03);
 
-    pub const dark_greenish_cyan: Color = .fromIntRgb(0x1db187);
-    pub const      greenish_cyan: Color = .fromIntRgb(0x17f0af);
+    pub const  dark_turquoise: Color = .fromIntRgb(0x1e8770);
+    pub const       turquoise: Color = .fromIntRgb(0x1db187);
+    pub const light_turquoise: Color = .fromIntRgb(0x17f0af);
 
     pub const darkest_cyan: Color = .fromIntRgb(0x165050);
     pub const  darker_cyan: Color = .fromIntRgb(0x207475);
