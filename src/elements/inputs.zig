@@ -70,18 +70,17 @@ pub fn drawTextInput(
         };
         cursor_rect.draw(cursor_color);
 
-        // TODO: remove raylib dependency from all the ifs
-        if (!hovering.currently and b.getMouseButtonState(.left) == b.MouseButtonState.clicked or rl.isKeyPressed(.enter) or rl.isKeyPressed(.kp_enter)) {
+        if (!hovering.currently and b.getMouseButtonState(.left) == b.MouseButtonState.clicked or b.getPseudoKeyState(.enter).isPressed()) {
             editing.* = false;
             result = text;
         }
 
-        if (rl.isKeyPressed(.escape)) {
+        if (b.getKeyState(.escape).isPressed()) {
             editing.* = false;
             break :editing;
         }
 
-        if (rl.isKeyPressed(.backspace) and (rl.isKeyDown(.left_control) or rl.isKeyDown(.right_control))) {
+        if (b.getKeyState(.backspace).isPressed() and b.getPseudoKeyState(.control).currently) {
             text_len.* = 0;
             if (return_on_change) {
                 result = buffer[0..text_len.*];
@@ -89,7 +88,7 @@ pub fn drawTextInput(
             break :editing;
         }
 
-        if (rl.isKeyPressed(.backspace) and text.len > 0) {
+        if (b.getKeyState(.backspace).isPressed() and text.len > 0) {
             text_len.* -= 1;
             if (return_on_change) {
                 result = buffer[0..text_len.*];
@@ -98,8 +97,7 @@ pub fn drawTextInput(
         }
 
         if (text_len.* + 1 < buffer.len) {
-            // TODO: reylib dep again
-            const unicode_char = rl.getCharPressed();
+            const unicode_char = b.getCharPressed();
             const char: u8 = if (unicode_char < 255) @intCast(unicode_char) else break :editing;
             if (char != '\t' and !ascii.isPrint(char)) break :editing;
 
