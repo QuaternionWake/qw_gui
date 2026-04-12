@@ -239,6 +239,58 @@ pub const MouseButtonState = packed struct {
     pub const released: MouseButtonState = .{ .currently = false, .previously = true };
 };
 
+// TODO: aliases for some keys (grave => backtick, return => enter, ...)
+// TODO: maybe give these concrete values?
+pub const KeyboardKey = enum(u16) {
+    // zig fmt: off
+    null = 0,
+
+    q, w, e, r, t, y, u, i, o, p,
+    a, s, d, f, g, h, j, k, l,
+    z, x, c, v, b, n, m,
+
+    space,
+
+    left_bracket, right_bracket,
+    semicolon, apostrophe, backslash,
+    comma, period, slash,
+
+    escape, backtick, tab, caps_lock,
+    backspace, enter,
+
+    left_shift, left_control, left_super, left_alt,
+    right_shift, right_control, right_super, right_alt,
+    menu,
+
+       zero,     one,     two,     three,     four,     five,     six,     seven,     eight,     nine,
+    np_zero,  np_one,  np_two,  np_three,  np_four,  np_five,  np_six,  np_seven,  np_eight,  np_nine,
+    minus, equals,
+    num_lock, np_divide, np_multiply, np_subrtact, np_add, np_decimal, np_equal, np_enter,
+
+    // TODO: higher than f12 keys?
+    f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12,
+
+    print_screen, scroll_lock, pause_break,
+    insert, delete, page_up, page_down, home, end,
+    up, down, left, right,
+    // zig fmt: on
+};
+
+pub const PseudoKeyboardKey = enum(u16) { shift, control, super, alt, enter };
+
+pub const KeyboardKeyState = packed struct {
+    currently: bool,
+    previously: bool,
+    repeat: bool,
+
+    pub fn isPressed(state: KeyboardKeyState) bool {
+        return state.currently and !state.previously or state.repeat;
+    }
+    pub fn isReleased(state: KeyboardKeyState) bool {
+        return !state.currently and state.previously;
+    }
+};
+
 pub const TextOptions = struct {
     font: ?Font = null,
     size: f32 = 10,
@@ -249,8 +301,14 @@ pub const TextOptions = struct {
 pub const Font = backend.Font;
 
 pub const getWindowSize: fn () Vec2 = backend.getWindowSize;
+
 pub const getMousePosition: fn () Vec2 = backend.getMousePosition;
 pub const getMouseButtonState: fn (MouseButton) MouseButtonState = backend.getMouseButtonState;
+
+pub const getCharPressed: fn () u21 = backend.getCharPressed;
+pub const getKeyState: fn (KeyboardKey) KeyboardKeyState = backend.getKeyState;
+pub const getPseudoKeyState: fn (PseudoKeyboardKey) KeyboardKeyState = backend.getPseudoKeyState;
+
 pub const getDefaultFont: fn () ?Font = backend.getDefaultFont;
 pub const drawText: fn (TextOptions, []const u8, Vec2, Color) void = backend.drawText;
 pub const measureText: fn (TextOptions, []const u8) Vec2 = backend.measureText;

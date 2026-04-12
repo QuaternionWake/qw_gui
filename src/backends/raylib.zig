@@ -1,3 +1,5 @@
+const std = @import("std");
+
 const rl = @import("raylib");
 
 const b = @import("../backend.zig");
@@ -36,6 +38,41 @@ pub fn getMouseButtonState(button: b.MouseButton) b.MouseButtonState {
     return .{
         .currently = held,
         .previously = !pressed and held or rl.isMouseButtonReleased(rl_button),
+    };
+}
+
+pub fn getCharPressed() u21 {
+    const rl_char = rl.getCharPressed();
+    return std.math.cast(u21, rl_char) orelse 0;
+}
+
+pub fn getKeyState(key: b.KeyboardKey) b.KeyboardKeyState {
+    const rl_key = toRlKey(key);
+    const pressed = rl.isKeyPressed(rl_key);
+    const held = rl.isKeyDown(rl_key);
+    const repeat = rl.isKeyPressedRepeat(rl_key);
+    return .{
+        .currently = held,
+        .previously = !pressed and held or rl.isKeyReleased(rl_key),
+        .repeat = repeat,
+    };
+}
+
+pub fn getPseudoKeyState(key: b.PseudoKeyboardKey) b.KeyboardKeyState {
+    const rl_key_a: rl.KeyboardKey, const rl_key_b: rl.KeyboardKey = switch (key) {
+        .shift => .{ .right_shift, .left_shift },
+        .control => .{ .right_control, .left_control },
+        .super => .{ .right_super, .left_super },
+        .alt => .{ .right_alt, .left_alt },
+        .enter => .{ .enter, .kp_enter },
+    };
+    const pressed = rl.isKeyPressed(rl_key_a) or rl.isKeyPressed(rl_key_b);
+    const held = rl.isKeyDown(rl_key_a) or rl.isKeyDown(rl_key_b);
+    const repeat = rl.isKeyPressedRepeat(rl_key_a) or rl.isKeyPressedRepeat(rl_key_b);
+    return .{
+        .currently = held,
+        .previously = !pressed and held or rl.isKeyReleased(rl_key_a) or rl.isKeyReleased(rl_key_b),
+        .repeat = repeat,
     };
 }
 
@@ -191,5 +228,116 @@ fn toRlRect(rect: b.Rectangle) rl.Rectangle {
         .y = rect.y,
         .width = rect.width,
         .height = rect.height,
+    };
+}
+
+fn toRlKey(key: b.KeyboardKey) rl.KeyboardKey {
+    return switch (key) {
+        .null => .null,
+        .apostrophe => .apostrophe,
+        .comma => .comma,
+        .minus => .minus,
+        .period => .period,
+        .slash => .slash,
+        .zero => .zero,
+        .one => .one,
+        .two => .two,
+        .three => .three,
+        .four => .four,
+        .five => .five,
+        .six => .six,
+        .seven => .seven,
+        .eight => .eight,
+        .nine => .nine,
+        .semicolon => .semicolon,
+        .equals => .equal,
+        .a => .a,
+        .b => .b,
+        .c => .c,
+        .d => .d,
+        .e => .e,
+        .f => .f,
+        .g => .g,
+        .h => .h,
+        .i => .i,
+        .j => .j,
+        .k => .k,
+        .l => .l,
+        .m => .m,
+        .n => .n,
+        .o => .o,
+        .p => .p,
+        .q => .q,
+        .r => .r,
+        .s => .s,
+        .t => .t,
+        .u => .u,
+        .v => .v,
+        .w => .w,
+        .x => .x,
+        .y => .y,
+        .z => .z,
+        .space => .space,
+        .escape => .escape,
+        .enter => .enter,
+        .tab => .tab,
+        .backspace => .backspace,
+        .insert => .insert,
+        .delete => .delete,
+        .right => .right,
+        .left => .left,
+        .down => .down,
+        .up => .up,
+        .page_up => .page_up,
+        .page_down => .page_down,
+        .home => .home,
+        .end => .end,
+        .caps_lock => .caps_lock,
+        .scroll_lock => .scroll_lock,
+        .num_lock => .num_lock,
+        .print_screen => .print_screen,
+        .pause_break => .pause,
+        .f1 => .f1,
+        .f2 => .f2,
+        .f3 => .f3,
+        .f4 => .f4,
+        .f5 => .f5,
+        .f6 => .f6,
+        .f7 => .f7,
+        .f8 => .f8,
+        .f9 => .f9,
+        .f10 => .f10,
+        .f11 => .f11,
+        .f12 => .f12,
+        .left_shift => .left_shift,
+        .left_control => .left_control,
+        .left_alt => .left_alt,
+        .left_super => .left_super,
+        .right_shift => .right_shift,
+        .right_control => .right_control,
+        .right_alt => .right_alt,
+        .right_super => .right_super,
+        .menu => .kb_menu,
+        .left_bracket => .left_bracket,
+        .backslash => .backslash,
+        .right_bracket => .right_bracket,
+        .backtick => .grave,
+        .np_zero => .kp_0,
+        .np_one => .kp_1,
+        .np_two => .kp_2,
+        .np_three => .kp_3,
+        .np_four => .kp_4,
+        .np_five => .kp_5,
+        .np_six => .kp_6,
+        .np_seven => .kp_7,
+        .np_eight => .kp_8,
+        .np_nine => .kp_9,
+        .np_decimal => .kp_decimal,
+        .np_divide => .kp_divide,
+        .np_multiply => .kp_multiply,
+        .np_subrtact => .kp_subtract,
+        .np_add => .kp_add,
+        .np_equal => .kp_enter,
+        .np_enter => .kp_equal,
     };
 }
