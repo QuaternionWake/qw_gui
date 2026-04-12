@@ -1,5 +1,4 @@
 const b = @import("backend");
-const rl = @import("raylib");
 
 parent: ?*const Self,
 
@@ -10,11 +9,6 @@ width: Width,
 height: Height,
 
 const Self = @This();
-
-pub fn rlRect(self: Self) rl.Rectangle {
-    const rect = self.vanillaRect();
-    return .init(rect.x, rect.y, rect.width, rect.height);
-}
 
 // TODO: better name for this?
 pub fn vanillaRect(self: Self) b.Rectangle {

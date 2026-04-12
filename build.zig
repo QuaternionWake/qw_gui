@@ -57,7 +57,6 @@ pub fn build(b: *std.Build) void {
     lib_mod.addImport("utils", utils_mod);
     backend_mod.addImport("raylib", rl_mod);
     grabbing_mod.addImport("backend", backend_mod);
-    rect_mod.addImport("raylib", rl_mod);
     rect_mod.addImport("backend", backend_mod);
 
     const lib = b.addLibrary(.{
