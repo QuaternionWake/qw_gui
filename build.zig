@@ -51,7 +51,6 @@ pub fn build(b: *std.Build) void {
 
     exe_mod.addImport("qw_gui", lib_mod);
     exe_mod.addImport("raylib", rl_mod);
-    lib_mod.addImport("raylib", rl_mod);
     lib_mod.addImport("grabbing", grabbing_mod);
     lib_mod.addImport("backend", backend_mod);
     lib_mod.addImport("Rect", rect_mod);

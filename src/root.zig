@@ -1,5 +1,4 @@
 const std = @import("std");
-const rl = @import("raylib");
 const b = @import("backend");
 
 comptime {
@@ -31,7 +30,7 @@ pub fn updateGuiGlobals() void {
     }
 
     grabbing.hovered_element = null;
-    if (!rl.isMouseButtonDown(.left)) {
+    if (!b.getMouseButtonState(.left).currently) {
         grabbing.held_element = null;
     }
 }
