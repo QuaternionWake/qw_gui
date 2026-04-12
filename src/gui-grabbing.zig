@@ -1,6 +1,6 @@
 const mem = @import("std").mem;
 
-const rl = @import("raylib");
+const b = @import("backend");
 
 pub const MAX_ID_LEN = 64;
 
@@ -48,7 +48,7 @@ pub const HoverInfo = packed struct {
 pub const CanGrab = bool;
 
 pub fn grabElement(id: []const u8) void {
-    if (rl.isMouseButtonDown(.left)) {
+    if (b.getMouseButtonState(.left).currently) {
         if (held_element == null) {
             const len = setId(&held_buf, id);
             held_element = held_buf[0..len];
