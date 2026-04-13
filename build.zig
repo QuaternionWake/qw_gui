@@ -159,8 +159,7 @@ const UnitTest = struct {
 };
 
 const unit_tests = [_]UnitTest{
-    .{ .module_name = .lib },
-    .{ .module_name = .exe },
+    .{ .module_name = .utils },
     .{ .module_name = .backend },
 };
 

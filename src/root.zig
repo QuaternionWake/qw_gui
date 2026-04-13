@@ -1,9 +1,4 @@
-const std = @import("std");
 const b = @import("backend");
-
-comptime {
-    std.testing.refAllDecls(@import("utils"));
-}
 
 pub const buttons = @import("elements/buttons.zig");
 pub const dropdowns = @import("elements/dropdowns.zig");
