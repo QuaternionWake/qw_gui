@@ -22,6 +22,13 @@ pub fn build(b: *std.Build) !void {
     module_array.set(.raylib, rl_dep.module("raylib"));
     const rl_artifact = rl_dep.artifact("raylib");
 
+    const qw_parse_dep = b.dependency("qw_parse", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    module_array.set(.num_parse, qw_parse_dep.module("num-parse"));
+    module_array.set(.num_format, qw_parse_dep.module("num-format"));
+
     for (modules) |module| {
         const mod = module_array.get(module.name);
         for (module.imports) |import| {
@@ -93,7 +100,9 @@ const ModuleName = enum {
     grabbing,
     backend,
     rect,
-    utils,
+
+    num_parse,
+    num_format,
     raylib,
 };
 
@@ -124,7 +133,8 @@ const modules = [_]Module{
             .{ .import_name = "grabbing", .module_name = .grabbing },
             .{ .import_name = "backend", .module_name = .backend },
             .{ .import_name = "Rect", .module_name = .rect },
-            .{ .import_name = "utils", .module_name = .utils },
+            .{ .import_name = "num_parse", .module_name = .num_parse },
+            .{ .import_name = "num_format", .module_name = .num_format },
         },
     },
     .{
@@ -148,10 +158,6 @@ const modules = [_]Module{
             .{ .import_name = "backend", .module_name = .backend },
         },
     },
-    .{
-        .name = .utils,
-        .path = "src/utils.zig",
-    },
 };
 
 const UnitTest = struct {
@@ -159,7 +165,6 @@ const UnitTest = struct {
 };
 
 const unit_tests = [_]UnitTest{
-    .{ .module_name = .utils },
     .{ .module_name = .backend },
 };
 

@@ -3,7 +3,8 @@ const math = std.math;
 const fmt = std.fmt;
 const ascii = std.ascii;
 
-const parsing = @import("utils").parsing;
+const parseInt = @import("num_parse").parseInt;
+const FormatInt = @import("num_format").FormatInt;
 const b = @import("backend");
 const Color = b.Color;
 const g = @import("grabbing");
@@ -148,10 +149,111 @@ pub const TextInput = struct {
 
     pub const Data = struct {
         buffer: []u8,
-        text_len: usize,
-        editing: bool,
+        text_len: usize = 0,
+        editing: bool = false,
     };
 };
+
+pub fn ValueInput(T: type) type {
+    return struct {
+        rect: Rect,
+        data: *ValueInput(T).Data,
+        id: []const u8,
+
+        /// Returns new value. If `return_on_change` is true, returns every frame
+        /// when the value changes, otherwise returns only when editing finishes.
+        /// A value will always be returned when editing finishes.
+        ///
+        /// If parsing the value fails, or the editing is canceled, the value stored
+        /// in .data will not change.
+        /// If this happens, the last value returned by this function most likely
+        /// won't be what is ultimately saved in .data
+        pub fn draw(self: ValueInput(T), return_on_change: bool) ?T {
+            return self.drawWithOptions(return_on_change, default_input_field_options);
+        }
+
+        pub fn drawWithOptions(self: ValueInput(T), return_on_change: bool, options: InputFieldOptions) ?T {
+            const ii = self.grab();
+            // When editing starts
+            if (!self.data.editing and ii.@"0" == g.HoldInfo.grabbed) {
+                const num_str = fmt.bufPrint(self.data.buffer, "{d}", .{self.data.value}) catch {
+                    unreachable; // TODO: handle failure
+                };
+                self.data.text_len = num_str.len;
+            }
+            if (!self.data.editing and self.data.text_len == 0) {
+                const num_str = fmt.bufPrint(self.data.buffer, "{f}", .{FormatInt(self.data.value, .{})}) catch {
+                    unreachable; // TODO: handle failure
+                };
+                self.data.text_len = num_str.len;
+            }
+
+            const prev_editing = self.data.editing;
+            const new_text = drawTextInput(
+                options,
+                self.rect,
+                ii,
+                self.data.buffer,
+                &self.data.text_len,
+                &self.data.editing,
+                return_on_change,
+            );
+
+            var result: ?T = null;
+
+            const editing_finished = prev_editing and !self.data.editing;
+            if (new_text) |str| {
+                const new_number: ?T = parseInt(T, str) catch |err| switch (err) {
+                    error.Overflow => self.data.max,
+                    error.Underflow => self.data.min,
+                    error.NoNumber => if (str.len == 0) 0 else null,
+                    else => null,
+                };
+                if (editing_finished) {
+                    if (new_number) |num| {
+                        self.data.value = math.clamp(num, self.data.min, self.data.max);
+                        result = self.data.value;
+                    }
+                    const num_str = fmt.bufPrint(self.data.buffer, "{f}", .{FormatInt(self.data.value, .{})}) catch {
+                        unreachable; // TODO: handle failure
+                    };
+                    self.data.text_len = num_str.len;
+                    return result;
+                } else {
+                    if (new_number) |num| {
+                        result = math.clamp(num, self.data.min, self.data.max);
+                    }
+                }
+            }
+
+            if (editing_finished) {
+                const num_str = fmt.bufPrint(self.data.buffer, "{f}", .{FormatInt(self.data.value, .{})}) catch {
+                    unreachable; // TODO: handle failure
+                };
+                self.data.text_len = num_str.len;
+            }
+
+            return result;
+        }
+
+        pub fn grab(self: ValueInput(T)) g.InteractionInfo {
+            if (self.rect.vanillaRect().containsPoint(b.getMousePosition())) {
+                g.hoverElement(self.id);
+                g.grabElement(self.id);
+            }
+            return g.getInteractionInfo(self.id);
+        }
+
+        pub const Data = struct {
+            value: T,
+            min: T = math.minInt(T),
+            max: T = math.maxInt(T),
+            buffer: []u8,
+            text_len: usize = 0,
+            editing: bool = false,
+        };
+    };
+}
 
 pub var default_input_field_options: InputFieldOptions = .{};
 
