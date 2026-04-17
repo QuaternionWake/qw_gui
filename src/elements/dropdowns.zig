@@ -152,7 +152,7 @@ pub var default_dropdown_options: DropdownOptions = .{};
 
 pub const DropdownOptions = struct {
     text_options: b.TextOptions = .{},
-    border_thickness: f32 = 5,
+    border_thickness: f32 = 2,
     inactive_colors: Colors = .colors(.light_gray, .gray, .gray),
     hovered_colors: Colors = .colors(.light_cyan, .dark_cyan, .dark_cyan),
     held_colors: Colors = .colors(.cyan, .darker_cyan, .darker_cyan),
