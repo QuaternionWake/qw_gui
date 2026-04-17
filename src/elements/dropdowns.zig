@@ -24,10 +24,24 @@ pub fn drawDropdown(
     rect_.draw(bg_color);
     rect_.drawOutline(border_color, options.border_thickness);
 
+    const arrow_height = options.text_options.size / 2;
+    const arrow_rect: b.Rectangle = .{
+        .x = rect_.x + rect_.width - arrow_height * 2 - 5 - options.border_thickness,
+        .y = rect_.y + (rect_.height - arrow_height) / 2,
+        .width = arrow_height * 2,
+        .height = arrow_height,
+    };
+    const triangle: b.Triangle = .{
+        .v1 = .{ .x = arrow_rect.x + arrow_rect.width, .y = arrow_rect.y },
+        .v2 = .{ .x = arrow_rect.x, .y = arrow_rect.y },
+        .v3 = .{ .x = arrow_rect.center().x, .y = arrow_rect.y + arrow_rect.height },
+    };
+    triangle.draw(text_color);
+
     const selected_text = items[selected.*];
     const text_size = b.measureText(options.text_options, selected_text);
     const text_pos: b.Vec2 = .{
-        .x = rect_.x + (rect_.width - text_size.x) / 2,
+        .x = rect_.x + (rect_.width - text_size.x - arrow_rect.width) / 2,
         .y = rect_.y + (rect_.height - text_size.y) / 2,
     };
     b.drawText(options.text_options, selected_text, text_pos, text_color);

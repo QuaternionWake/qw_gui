@@ -220,6 +220,13 @@ pub const Rectangle = struct {
         };
     }
 
+    pub fn center(self: Rectangle) Vec2 {
+        return .{
+            .x = self.x + self.width / 2,
+            .y = self.y + self.height / 2,
+        };
+    }
+
     pub fn containsPoint(self: Rectangle, point: Vec2) bool {
         return (point.x >= self.x and point.x <= self.x + self.width) and
             (point.y >= self.y and point.y <= self.y + self.height);
@@ -227,6 +234,22 @@ pub const Rectangle = struct {
 
     pub const draw: fn (Rectangle, Color) void = backend.drawRectangle;
     pub const drawOutline: fn (Rectangle, Color, f32) void = backend.drawRectangleOutline;
+};
+
+pub const Triangle = struct {
+    v1: Vec2,
+    v2: Vec2,
+    v3: Vec2,
+
+    pub fn init(x1: f32, y1: f32, x2: f32, y2: f32, x3: f32, y3: f32) Triangle {
+        return .{
+            .v1 = .{ .x = x1, .y = y1 },
+            .v2 = .{ .x = x2, .y = y2 },
+            .v3 = .{ .x = x3, .y = y3 },
+        };
+    }
+
+    pub const draw: fn (Triangle, Color) void = backend.drawTriangle;
 };
 
 pub const MouseButton = enum { left, right, middle };

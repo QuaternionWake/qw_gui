@@ -12,6 +12,10 @@ pub fn drawRectangleOutline(rectangle: b.Rectangle, color: b.Color, thickness: f
     rl.drawRectangleLinesEx(toRlRect(rectangle), thickness, toRlColor(color));
 }
 
+pub fn drawTriangle(triangle: b.Triangle, color: b.Color) void {
+    rl.drawTriangle(toRlVec2(triangle.v1), toRlVec2(triangle.v2), toRlVec2(triangle.v3), toRlColor(color));
+}
+
 pub fn getWindowSize() b.Vec2 {
     return .{
         .x = @floatFromInt(rl.getRenderWidth()),
