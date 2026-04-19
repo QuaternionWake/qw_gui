@@ -60,6 +60,42 @@ pub const Button = struct {
     }
 };
 
+pub fn FnButton(Fn: type) type {
+    return struct {
+        rect: Rect,
+        text: []const u8,
+        func: *const Fn,
+        id: []const u8,
+
+        const FuncReturnType = @typeInfo(Fn).@"fn".return_type.?;
+        const ReturnType = if (FuncReturnType == void) void else ?FuncReturnType;
+
+        pub fn draw(self: FnButton(Fn), args: anytype) ReturnType {
+            return self.drawWithOptions(default_button_options, args);
+        }
+
+        pub fn drawWithOptions(self: FnButton(Fn), options: ButtonOptions, args: anytype) ReturnType {
+            if (drawButton(
+                options,
+                self.rect,
+                self.grab(),
+                self.text,
+            )) {
+                return @call(.auto, self.func, args);
+            }
+            if (ReturnType != void) return null;
+        }
+
+        pub fn grab(self: FnButton(Fn)) g.InteractionInfo {
+            if (self.rect.vanillaRect().containsPoint(b.getMousePosition())) {
+                g.hoverElement(self.id);
+                g.grabElement(self.id);
+            }
+            return g.getInteractionInfo(self.id);
+        }
+    };
+}
+
 pub var default_button_options: ButtonOptions = .{};
 
 pub const ButtonOptions = struct {
