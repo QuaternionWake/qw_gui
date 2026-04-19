@@ -1,3 +1,6 @@
+const mem = @import("std").mem;
+const enumFromInt = @import("std").enums.fromInt;
+
 const b = @import("backend");
 const Color = b.Color;
 const g = @import("grabbing");
@@ -147,6 +150,71 @@ pub const Dropdown = struct {
         editing: bool = false,
     };
 };
+
+pub fn EnumDropdown(Enum: type) type {
+    return struct {
+        rect: Rect,
+        data: *EnumDropdown(Enum).Data,
+        id: []const u8,
+
+        pub fn draw(self: EnumDropdown(Enum)) ?Enum {
+            return self.drawWithOptions(default_dropdown_options);
+        }
+
+        pub fn drawWithOptions(self: EnumDropdown(Enum), options: DropdownOptions) ?Enum {
+            var selected = mem.indexOfScalar(Enum, &variants, self.data.selected) orelse unreachable;
+            const result = drawDropdown(
+                options,
+                self.rect,
+                self.grab(),
+                &items,
+                &selected,
+                &self.data.editing,
+            );
+            self.data.selected = variants[selected];
+
+            if (result) |r| {
+                return variants[r];
+            }
+            return null;
+        }
+
+        pub fn grab(self: EnumDropdown(Enum)) g.InteractionInfo {
+            if (self.rect.vanillaRect().containsPoint(b.getMousePosition()) or
+                self.data.editing and fullRect(self.rect.vanillaRect(), items.len).containsPoint(b.getMousePosition()))
+            {
+                g.hoverElement(self.id);
+                g.grabElement(self.id);
+            }
+            return g.getInteractionInfo(self.id);
+        }
+
+        // needed to work with non-dense enums
+        const variants = blk: {
+            const fields = @typeInfo(Enum).@"enum".fields;
+            var variants_: [fields.len]Enum = undefined;
+            for (fields, 0..) |field, i| {
+                variants_[i] = @enumFromInt(field.value);
+            }
+            break :blk variants_;
+        };
+
+        const items = blk: {
+            const fields = @typeInfo(Enum).@"enum".fields;
+            var items_: [fields.len][]const u8 = undefined;
+            for (fields, 0..) |field, i| {
+                items_[i] = field.name;
+            }
+            break :blk items_;
+        };
+
+        pub const Data = struct {
+            selected: Enum = enumFromInt(Enum, 0) orelse
+                @compileError("`" ++ @typeName(Enum) ++ "` does not have a variant with value 0, you must provide an explicit inital value"),
+            editing: bool = false,
+        };
+    };
+}
 
 pub var default_dropdown_options: DropdownOptions = .{};
 

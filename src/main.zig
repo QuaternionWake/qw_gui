@@ -34,14 +34,13 @@ pub fn main() !void {
         if (scary_button.draw()) {
             counter = 0;
         }
-        if (test_dropdown.draw()) |idx| {
-            bg_color = switch (idx) {
-                0 => .ray_white,
-                1 => .red,
-                2 => .green,
-                3 => .sky_blue,
-                4 => .dark_gray,
-                else => unreachable,
+        if (test_dropdown.draw()) |color| {
+            bg_color = switch (color) {
+                .ray_white => .ray_white,
+                .red => .red,
+                .green => .green,
+                .sky_blue => .sky_blue,
+                .dark_gray => .dark_gray,
             };
         }
         rl.drawText(rl.textFormat("%d", .{counter}), 295, 100, 20, .black);
@@ -147,7 +146,7 @@ const green_button_options: gui.buttons.ButtonOptions = .{
     .held_colors = .colors(.pale_green, .dark_pale_green, .dark_pale_green),
 };
 
-const test_dropdown: gui.dropdowns.Dropdown = .{
+const test_dropdown: gui.dropdowns.EnumDropdown(Colors) = .{
     .rect = .{
         .parent = null,
         .x = .{ .left = 20 },
@@ -155,12 +154,13 @@ const test_dropdown: gui.dropdowns.Dropdown = .{
         .width = .{ .amount = 80 },
         .height = .{ .amount = 30 },
     },
-    .items = &.{ "White", "Red", "Green", "Blue", "Gray" },
     .data = &test_dropdown_data,
     .id = "test_dropdown",
 };
 
-var test_dropdown_data: gui.dropdowns.Dropdown.Data = .{};
+var test_dropdown_data: gui.dropdowns.EnumDropdown(Colors).Data = .{};
+
+const Colors = enum(u8) { ray_white, red, green, sky_blue, dark_gray };
 
 const scary_button: gui.buttons.Button = .{
     .rect = .{
