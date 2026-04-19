@@ -20,7 +20,6 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
     module_array.set(.raylib, rl_dep.module("raylib"));
-    const rl_artifact = rl_dep.artifact("raylib");
 
     const qw_parse_dep = b.dependency("qw_parse", .{
         .target = target,
@@ -42,8 +41,6 @@ pub fn build(b: *std.Build) !void {
         .name = "qw_gui",
         .root_module = module_array.get(.lib),
     });
-
-    lib.linkLibrary(rl_artifact);
 
     b.installArtifact(lib);
 
