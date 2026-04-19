@@ -9,6 +9,7 @@ const b = @import("backend");
 const Color = b.Color;
 const g = @import("grabbing");
 const Rect = @import("Rect");
+const buttons = @import("buttons.zig");
 
 pub fn drawTextInput(
     options: InputFieldOptions,
@@ -248,6 +249,160 @@ pub fn ValueInput(T: type) type {
             value: T,
             min: T = math.minInt(T),
             max: T = math.maxInt(T),
+            buffer: []u8,
+            text_len: usize = 0,
+            editing: bool = false,
+        };
+    };
+}
+
+pub fn ValueInputWithButtons(T: type) type {
+    return struct {
+        rect: Rect,
+        data: *ValueInputWithButtons(T).Data,
+        id: []const u8,
+
+        /// Returns new value. If `return_on_change` is true, returns every frame
+        /// when the value changes, otherwise returns only when editing finishes.
+        /// A value will always be returned when editing finishes, or a button is
+        /// pressed.
+        ///
+        /// If parsing the value fails, or the editing is canceled, the value stored
+        /// in .data will not change.
+        /// If this happens, the last value returned by this function most likely
+        /// won't be what is ultimately saved in .data
+        pub fn draw(self: ValueInputWithButtons(T), return_on_change: bool) ?T {
+            return self.drawWithOptions(return_on_change, default_input_field_options, buttons.default_button_options);
+        }
+
+        pub fn drawWithOptions(self: ValueInputWithButtons(T), return_on_change: bool, input_options: InputFieldOptions, button_options: buttons.ButtonOptions) ?T {
+            const not_interacting: g.InteractionInfo = .{
+                .{ .currently = false, .previously = false },
+                .{ .currently = false, .previously = false },
+                false,
+            };
+            const lbutton_rect, const text_rect, const rbutton_rect = self.rects();
+            const ii = self.grab();
+            const lbutton_ii = if (lbutton_rect.vanillaRect().containsPoint(b.getMousePosition())) ii else not_interacting;
+            const text_ii = if (text_rect.vanillaRect().containsPoint(b.getMousePosition())) ii else not_interacting;
+            const rbutton_ii = if (rbutton_rect.vanillaRect().containsPoint(b.getMousePosition())) ii else not_interacting;
+
+            // When editing starts
+            if (!self.data.editing and text_ii.@"0" == g.HoldInfo.grabbed) {
+                self.updateText(true);
+            }
+            if (!self.data.editing and self.data.text_len == 0) {
+                self.updateText(false);
+            }
+
+            const prev_editing = self.data.editing;
+            const new_text = drawTextInput(
+                input_options,
+                text_rect,
+                text_ii,
+                self.data.buffer,
+                &self.data.text_len,
+                &self.data.editing,
+                return_on_change,
+            );
+
+            var result: ?T = null;
+            if (buttons.drawButton(button_options, lbutton_rect, lbutton_ii, "-")) {
+                const new_val = self.data.value -| self.data.button_step;
+                self.data.value = math.clamp(new_val, self.data.min, self.data.max);
+                result = self.data.value;
+                self.updateText(false);
+            }
+            if (buttons.drawButton(button_options, rbutton_rect, rbutton_ii, "+")) {
+                const new_val = self.data.value +| self.data.button_step;
+                self.data.value = math.clamp(new_val, self.data.min, self.data.max);
+                result = self.data.value;
+                self.updateText(false);
+            }
+
+            const editing_finished = prev_editing and !self.data.editing;
+            if (new_text) |str| {
+                const new_number: ?T = parseInt(T, str) catch |err| switch (err) {
+                    error.Overflow => self.data.max,
+                    error.Underflow => self.data.min,
+                    error.NoNumber => if (str.len == 0) 0 else null,
+                    else => null,
+                };
+                if (editing_finished) {
+                    if (new_number) |num| {
+                        self.data.value = math.clamp(num, self.data.min, self.data.max);
+                        result = self.data.value;
+                    }
+                    self.updateText(false);
+                    return result;
+                } else {
+                    if (new_number) |num| {
+                        result = math.clamp(num, self.data.min, self.data.max);
+                    }
+                }
+            }
+
+            if (editing_finished) {
+                self.updateText(false);
+            }
+
+            return result;
+        }
+
+        pub fn grab(self: ValueInputWithButtons(T)) g.InteractionInfo {
+            if (self.rect.vanillaRect().containsPoint(b.getMousePosition())) {
+                g.hoverElement(self.id);
+                g.grabElement(self.id);
+            }
+            return g.getInteractionInfo(self.id);
+        }
+
+        fn updateText(self: ValueInputWithButtons(T), editing: bool) void {
+            if (editing) {
+                const num_str = fmt.bufPrint(self.data.buffer, "{d}", .{self.data.value}) catch {
+                    unreachable; // TODO: handle failure
+                };
+                self.data.text_len = num_str.len;
+            } else {
+                const num_str = fmt.bufPrint(self.data.buffer, "{f}", .{FormatInt(self.data.value, .{})}) catch {
+                    unreachable; // TODO: handle failure
+                };
+                self.data.text_len = num_str.len;
+            }
+        }
+
+        fn rects(self: *const ValueInputWithButtons(T)) struct { Rect, Rect, Rect } {
+            const rect = self.rect.vanillaRect();
+            const padding = 1;
+            const lbutton_rect: Rect = .{
+                .parent = &self.rect,
+                .x = .{ .left = 0 },
+                .y = .{ .top = 0 },
+                .width = .{ .amount = rect.height },
+                .height = .max,
+            };
+            const text_rect: Rect = .{
+                .parent = &self.rect,
+                .x = .{ .middle = 0 },
+                .y = .{ .top = 0 },
+                .width = .{ .relative = -(rect.height + padding) * 2 },
+                .height = .max,
+            };
+            const rbutton_rect: Rect = .{
+                .parent = &self.rect,
+                .x = .{ .right = 0 },
+                .y = .{ .top = 0 },
+                .width = .{ .amount = rect.height },
+                .height = .max,
+            };
+            return .{ lbutton_rect, text_rect, rbutton_rect };
+        }
+
+        pub const Data = struct {
+            value: T,
+            min: T = math.minInt(T),
+            max: T = math.maxInt(T),
+            button_step: T = 1,
             buffer: []u8,
             text_len: usize = 0,
             editing: bool = false,

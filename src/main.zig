@@ -174,19 +174,19 @@ const scary_button: gui.buttons.Button = .{
     .id = "scary_button",
 };
 
-const step_up_input: gui.inputs.ValueInput(u32) = .{
+const step_up_input: gui.inputs.ValueInputWithButtons(u32) = .{
     .rect = .{
         .parent = &test_button.rect,
-        .x = .{ .left = -90 },
+        .x = .{ .left = -120 },
         .y = .{ .middle = 0 },
-        .width = .{ .amount = 50 },
+        .width = .{ .amount = 90 },
         .height = .{ .amount = 20 },
     },
     .data = &step_up_data,
     .id = "step_up_input",
 };
 
-var step_up_data: gui.inputs.ValueInput(u32).Data = .{
+var step_up_data: gui.inputs.ValueInputWithButtons(u32).Data = .{
     .value = 1,
     .min = 1,
     .max = 1_000_000,
@@ -195,19 +195,19 @@ var step_up_data: gui.inputs.ValueInput(u32).Data = .{
 
 var step_up_input_bufer: [128]u8 = undefined;
 
-const step_down_input: gui.inputs.ValueInput(u32) = .{
+const step_down_input: gui.inputs.ValueInputWithButtons(u32) = .{
     .rect = .{
         .parent = &custom_button.rect,
-        .x = .{ .left = -90 },
+        .x = .{ .left = -120 },
         .y = .{ .middle = 0 },
-        .width = .{ .amount = 50 },
+        .width = .{ .amount = 90 },
         .height = .{ .amount = 20 },
     },
     .data = &step_down_data,
     .id = "step_down_input",
 };
 
-var step_down_data: gui.inputs.ValueInput(u32).Data = .{
+var step_down_data: gui.inputs.ValueInputWithButtons(u32).Data = .{
     .value = 1,
     .min = 1,
     .max = 1_000_000,
