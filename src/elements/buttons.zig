@@ -1,3 +1,4 @@
+const gui = @import("qw_gui");
 const b = @import("backend");
 const Color = b.Color;
 const g = @import("grabbing");
@@ -7,12 +8,18 @@ pub fn drawButton(
     options: ButtonOptions,
     rect: Rect,
     interaction: g.InteractionInfo,
+    forced_style: ?gui.State,
     text: []const u8,
 ) bool {
     const rect_ = rect.vanillaRect();
     const holding, const hovering, const can_grab = interaction;
     const bg_color, const border_color, const text_color =
-        if (holding.currently and hovering.currently)
+        if (forced_style) |s| switch (s) {
+            .default => options.inactive_colors.get(),
+            .hovered => options.hovered_colors.get(),
+            .held => options.held_colors.get(),
+            .disabled => options.disabled_colors.get(),
+        } else if (holding.currently and hovering.currently)
             options.held_colors.get()
         else if (can_grab and hovering.currently)
             options.hovered_colors.get()
@@ -48,6 +55,7 @@ pub const Button = struct {
             options,
             self.rect,
             self.grab(),
+            null,
             self.text,
         );
     }
@@ -83,6 +91,7 @@ pub fn FnButton(Fn: type) type {
                 options,
                 self.rect,
                 self.grab(),
+                null,
                 self.text,
             )) {
                 return @call(.auto, self.func, args);
@@ -100,6 +109,51 @@ pub fn FnButton(Fn: type) type {
     };
 }
 
+/// A button that con be toggled on or off.
+pub const ToggleButton = struct {
+    rect: Rect,
+    text: []const u8,
+    data: *ToggleButton.Data,
+    id: []const u8,
+
+    /// Returns new state when clicked.
+    pub fn draw(self: ToggleButton) ?bool {
+        return self.drawWithOptions(default_button_options);
+    }
+
+    pub fn drawWithOptions(self: ToggleButton, options: ButtonOptions) ?bool {
+        const ii = self.grab();
+        const state: ?gui.State =
+            if (self.data.pressed or (ii.@"0".holdingAny()) and ii.@"1".currently)
+                .held
+            else
+                null;
+        if (drawButton(
+            options,
+            self.rect,
+            self.grab(),
+            state,
+            self.text,
+        )) {
+            self.data.pressed = !self.data.pressed;
+            return self.data.pressed;
+        }
+        return null;
+    }
+
+    pub fn grab(self: ToggleButton) g.InteractionInfo {
+        if (self.rect.vanillaRect().containsPoint(b.getMousePosition())) {
+            g.hoverElement(self.id);
+            g.grabElement(self.id);
+        }
+        return g.getInteractionInfo(self.id);
+    }
+
+    pub const Data = struct {
+        pressed: bool = false,
+    };
+};
+
 pub var default_button_options: ButtonOptions = .{};
 
 pub const ButtonOptions = struct {
@@ -108,6 +162,7 @@ pub const ButtonOptions = struct {
     inactive_colors: Colors = .colors(.light_gray, .gray, .gray),
     hovered_colors: Colors = .colors(.light_cyan, .dark_cyan, .dark_cyan),
     held_colors: Colors = .colors(.cyan, .darker_cyan, .darker_cyan),
+    disabled_colors: Colors = .colors(.lighter_gray, .light_gray, .light_gray),
 
     const Colors = struct {
         background: Color,

@@ -35,6 +35,10 @@ pub const HoldInfo = packed struct {
 
     pub const grabbed: HoldInfo = .{ .currently = true, .previously = false };
     pub const released: HoldInfo = .{ .currently = false, .previously = true };
+
+    pub fn holdingAny(self: HoldInfo) bool {
+        return self.currently or self.previously;
+    }
 };
 
 pub const HoverInfo = packed struct {
@@ -43,6 +47,10 @@ pub const HoverInfo = packed struct {
 
     pub const hovered: HoverInfo = .{ .currently = true, .previously = false };
     pub const unhovered: HoverInfo = .{ .currently = false, .previously = true };
+
+    pub fn hoveringAny(self: HoldInfo) bool {
+        return self.currently or self.previously;
+    }
 };
 
 pub const CanGrab = bool;

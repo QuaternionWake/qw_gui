@@ -127,6 +127,7 @@ const modules = [_]Module{
         .name = .lib,
         .path = "src/root.zig",
         .imports = &.{
+            .{ .import_name = "qw_gui", .module_name = .lib },
             .{ .import_name = "grabbing", .module_name = .grabbing },
             .{ .import_name = "backend", .module_name = .backend },
             .{ .import_name = "Rect", .module_name = .rect },

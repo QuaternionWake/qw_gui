@@ -10,6 +10,8 @@ pub const grabbing = @import("grabbing");
 
 pub const Color = b.Color;
 
+pub const State = enum { default, hovered, held, disabled };
+
 pub fn updateGuiGlobals() void {
     if (grabbing.held_element) |held| {
         const len = grabbing.setId(&grabbing.previous_held_buf, held);

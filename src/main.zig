@@ -34,6 +34,7 @@ pub fn main() !void {
         if (scary_button.draw()) {
             counter = 0;
         }
+        _ = toggle_button.draw();
         if (test_dropdown.draw()) |color| {
             bg_color = switch (color) {
                 .ray_white => .ray_white,
@@ -173,6 +174,21 @@ const scary_button: gui.buttons.Button = .{
     .text = "Scary button",
     .id = "scary_button",
 };
+
+const toggle_button: gui.buttons.ToggleButton = .{
+    .rect = .{
+        .parent = null,
+        .x = .{ .left = 150 },
+        .y = .{ .top = 20 },
+        .height = .{ .amount = 40 },
+        .width = .{ .amount = 140 },
+    },
+    .text = "I can be on or off",
+    .id = "toggle_button",
+    .data = &toggle_button_data,
+};
+
+var toggle_button_data: gui.buttons.ToggleButton.Data = .{};
 
 const step_up_input: gui.inputs.ValueInputWithButtons(u32) = .{
     .rect = .{

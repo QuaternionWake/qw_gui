@@ -318,13 +318,13 @@ pub fn ValueInputWithButtons(T: type) type {
             );
 
             var result: ?T = null;
-            if (buttons.drawButton(button_options, lbutton_rect, lbutton_ii, "-")) {
+            if (buttons.drawButton(button_options, lbutton_rect, lbutton_ii, null, "-")) {
                 const new_val = self.data.value -| self.data.button_step;
                 self.data.value = math.clamp(new_val, self.data.min, self.data.max);
                 result = self.data.value;
                 self.updateText(false);
             }
-            if (buttons.drawButton(button_options, rbutton_rect, rbutton_ii, "+")) {
+            if (buttons.drawButton(button_options, rbutton_rect, rbutton_ii, null, "+")) {
                 const new_val = self.data.value +| self.data.button_step;
                 self.data.value = math.clamp(new_val, self.data.min, self.data.max);
                 result = self.data.value;
