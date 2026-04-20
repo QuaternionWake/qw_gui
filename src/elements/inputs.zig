@@ -5,6 +5,8 @@ const ascii = std.ascii;
 
 const parseInt = @import("num_parse").parseInt;
 const FormatInt = @import("num_format").FormatInt;
+
+const gui = @import("qw_gui");
 const b = @import("backend");
 const Color = b.Color;
 const g = @import("grabbing");
@@ -15,6 +17,7 @@ pub fn drawTextInput(
     options: InputFieldOptions,
     rect: Rect,
     interaction: g.InteractionInfo,
+    forced_style: ?gui.State,
     buffer: []u8,
     text_len: *usize,
     editing: *bool,
@@ -24,7 +27,12 @@ pub fn drawTextInput(
     const rect_ = rect.vanillaRect();
     const holding, const hovering, const can_grab = interaction;
     const bg_color, const border_color, const text_color, const cursor_color =
-        if (editing.* or holding.currently and hovering.currently)
+        if (forced_style) |s| switch (s) {
+            .default => options.inactive_colors.get(),
+            .hovered => options.hovered_colors.get(),
+            .held => options.held_colors.get(),
+            .disabled => options.disabled_colors.get(),
+        } else if (editing.* or holding.currently and hovering.currently)
             options.held_colors.get()
         else if (can_grab and hovering.currently)
             options.hovered_colors.get()
@@ -140,6 +148,7 @@ pub const TextInput = struct {
             options,
             self.rect,
             self.grab(),
+            null,
             self.data.buffer,
             &self.data.text_len,
             &self.data.editing,
@@ -203,6 +212,7 @@ pub fn ValueInput(T: type) type {
                 options,
                 self.rect,
                 ii,
+                null,
                 self.data.buffer,
                 &self.data.text_len,
                 &self.data.editing,
@@ -311,6 +321,7 @@ pub fn ValueInputWithButtons(T: type) type {
                 input_options,
                 text_rect,
                 text_ii,
+                null,
                 self.data.buffer,
                 &self.data.text_len,
                 &self.data.editing,
@@ -432,6 +443,7 @@ pub const InputFieldOptions = struct {
     inactive_colors: Colors = .colors(.white, .gray, .gray, .gray),
     hovered_colors: Colors = .colors(.white, .cyan, .gray, .dark_cyan),
     held_colors: Colors = .colors(.lighter_cyan, .cyan, .gray, .dark_cyan),
+    disabled_colors: Colors = .colors(.lighter_gray, .light_gray, .light_gray, .light_gray),
 
     const Colors = struct {
         background: Color,

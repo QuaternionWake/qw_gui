@@ -1,6 +1,7 @@
 const mem = @import("std").mem;
 const enumFromInt = @import("std").enums.fromInt;
 
+const gui = @import("qw_gui");
 const b = @import("backend");
 const Color = b.Color;
 const g = @import("grabbing");
@@ -10,6 +11,7 @@ pub fn drawDropdown(
     options: DropdownOptions,
     rect: Rect,
     interaction: g.InteractionInfo,
+    forced_style: ?gui.State,
     items: []const []const u8,
     selected: *usize,
     editing: *bool,
@@ -17,7 +19,12 @@ pub fn drawDropdown(
     const rect_ = rect.vanillaRect();
     const holding, const hovering, const can_grab = interaction;
     const bg_color, const border_color, const text_color =
-        if (holding.currently and hovering.currently or editing.*)
+        if (forced_style) |s| switch (s) {
+            .default => options.inactive_colors.get(),
+            .hovered => options.hovered_colors.get(),
+            .held => options.held_colors.get(),
+            .disabled => options.disabled_colors.get(),
+        } else if (holding.currently and hovering.currently or editing.*)
             options.held_colors.get()
         else if (can_grab and hovering.currently)
             options.hovered_colors.get()
@@ -131,6 +138,7 @@ pub const Dropdown = struct {
             options,
             self.rect,
             self.grab(),
+            null,
             self.items,
             &self.data.selected,
             &self.data.editing,
@@ -171,6 +179,7 @@ pub fn EnumDropdown(Enum: type) type {
                 options,
                 self.rect,
                 self.grab(),
+                null,
                 &items,
                 &selected,
                 &self.data.editing,
@@ -228,6 +237,7 @@ pub const DropdownOptions = struct {
     inactive_colors: Colors = .colors(.light_gray, .gray, .gray),
     hovered_colors: Colors = .colors(.light_cyan, .dark_cyan, .dark_cyan),
     held_colors: Colors = .colors(.cyan, .darker_cyan, .darker_cyan),
+    disabled_colors: Colors = .colors(.lighter_gray, .light_gray, .light_gray),
 
     const Colors = struct {
         background: Color,

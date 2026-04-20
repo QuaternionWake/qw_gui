@@ -1,6 +1,7 @@
 const std = @import("std");
 const math = std.math;
 
+const gui = @import("qw_gui");
 const b = @import("backend");
 const Color = b.Color;
 const g = @import("grabbing");
@@ -10,6 +11,7 @@ pub fn drawSlider(
     options: SliderOptions,
     rect: Rect,
     interaction: g.InteractionInfo,
+    forced_style: ?gui.State,
     min: f32,
     max: f32,
     value: *f32,
@@ -18,7 +20,12 @@ pub fn drawSlider(
     const rect_ = rect.vanillaRect();
     const holding, const hovering, const can_grab = interaction;
     const bg_color, const border_color, const box_color =
-        if (holding.currently)
+        if (forced_style) |s| switch (s) {
+            .default => options.inactive_colors.get(),
+            .hovered => options.hovered_colors.get(),
+            .held => options.held_colors.get(),
+            .disabled => options.disabled_colors.get(),
+        } else if (holding.currently)
             options.held_colors.get()
         else if (can_grab and hovering.currently)
             options.hovered_colors.get()
@@ -82,6 +89,7 @@ pub const Slider = struct {
             options,
             self.rect,
             self.grab(),
+            null,
             self.data.min,
             self.data.max,
             &self.data.value,
@@ -113,6 +121,7 @@ pub const SliderOptions = struct {
     inactive_colors: Colors = .colors(.white, .light_gray, .light_cyan),
     hovered_colors: Colors = .colors(.white, .light_gray, .cyan),
     held_colors: Colors = .colors(.white, .light_gray, .darker_cyan),
+    disabled_colors: Colors = .colors(.white, .light_gray, .light_gray),
 
     const Colors = struct {
         background: Color,
