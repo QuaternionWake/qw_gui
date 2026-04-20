@@ -32,12 +32,13 @@ pub fn drawButton(
     return hovering.currently and holding == g.HoldInfo.released;
 }
 
+/// A button that returns true on click.
 pub const Button = struct {
     rect: Rect,
     text: []const u8,
     id: []const u8,
 
-    /// Returns true when clicked
+    /// Returns `true` when clicked.
     pub fn draw(self: Button) bool {
         return self.drawWithOptions(default_button_options);
     }
@@ -60,6 +61,7 @@ pub const Button = struct {
     }
 };
 
+/// A button that executes a function on click.
 pub fn FnButton(Fn: type) type {
     return struct {
         rect: Rect,
@@ -70,6 +72,8 @@ pub fn FnButton(Fn: type) type {
         const FuncReturnType = @typeInfo(Fn).@"fn".return_type.?;
         const ReturnType = if (FuncReturnType == void) void else ?FuncReturnType;
 
+        /// Executes `func` when clicked.
+        /// If func has a non-`void` return type, returns its return value.
         pub fn draw(self: FnButton(Fn), args: anytype) ReturnType {
             return self.drawWithOptions(default_button_options, args);
         }

@@ -119,11 +119,18 @@ pub fn drawTextInput(
     return result;
 }
 
+/// A single-line text input field.
 pub const TextInput = struct {
     rect: Rect,
     data: *TextInput.Data,
     id: []const u8,
 
+    /// Returns new string. If `return_on_change` is `true`, returns every frame when
+    /// the string changes, otherwise returns only when editing finishes. A string will
+    /// always be returned when editing finishes unless the editing is canceled.
+    ///
+    /// If the editing is canceled, the new value will not be returned, but **will** be
+    /// saved in `.data`.
     pub fn draw(self: TextInput, return_on_change: bool) ?[]u8 {
         return self.drawWithOptions(return_on_change, default_input_field_options);
     }
@@ -155,20 +162,22 @@ pub const TextInput = struct {
     };
 };
 
+/// An input field for a numeric value.
 pub fn ValueInput(T: type) type {
     return struct {
         rect: Rect,
         data: *ValueInput(T).Data,
         id: []const u8,
 
-        /// Returns new value. If `return_on_change` is true, returns every frame
-        /// when the value changes, otherwise returns only when editing finishes.
-        /// A value will always be returned when editing finishes.
+        /// Returns new value. If `return_on_change` is `true`, returns every frame when the
+        /// value changes, otherwise returns only when editing finishes. A value will always
+        /// be returned when editing finishes, unless parsing the value fails or the editing
+        /// is canceled.
         ///
-        /// If parsing the value fails, or the editing is canceled, the value stored
-        /// in .data will not change.
-        /// If this happens, the last value returned by this function most likely
-        /// won't be what is ultimately saved in .data
+        /// If parsing the value fails, or the editing is canceled, the value stored in
+        /// `.data` will not change. If this happens, and `return_on_change` was `true`, the
+        /// last value returned by this function most likely won't be what is ultimately
+        /// saved in `.data`.
         pub fn draw(self: ValueInput(T), return_on_change: bool) ?T {
             return self.drawWithOptions(return_on_change, default_input_field_options);
         }
@@ -256,21 +265,23 @@ pub fn ValueInput(T: type) type {
     };
 }
 
+/// An input field for a numeric value with buttons for incrementing and
+/// decrementing the value on the sides.
 pub fn ValueInputWithButtons(T: type) type {
     return struct {
         rect: Rect,
         data: *ValueInputWithButtons(T).Data,
         id: []const u8,
 
-        /// Returns new value. If `return_on_change` is true, returns every frame
-        /// when the value changes, otherwise returns only when editing finishes.
-        /// A value will always be returned when editing finishes, or a button is
-        /// pressed.
+        /// Returns new value. If `return_on_change` is `true`, returns every frame when the
+        /// value changes, otherwise returns only when editing finishes. A value will always
+        /// be returned when editing finishes, unless parsing the value fails or the editing
+        /// is canceled. A value will always be returned when a button is pressed.
         ///
-        /// If parsing the value fails, or the editing is canceled, the value stored
-        /// in .data will not change.
-        /// If this happens, the last value returned by this function most likely
-        /// won't be what is ultimately saved in .data
+        /// If parsing the value fails, or the editing is canceled, the value stored in
+        /// `.data` will not change. If this happens, and `return_on_change` was `true`, the
+        /// last value returned by this function most likely won't be what is ultimately
+        /// saved in `.data`
         pub fn draw(self: ValueInputWithButtons(T), return_on_change: bool) ?T {
             return self.drawWithOptions(return_on_change, default_input_field_options, buttons.default_button_options);
         }

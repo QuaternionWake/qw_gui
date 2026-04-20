@@ -65,13 +65,14 @@ pub fn drawSlider(
         null;
 }
 
+/// A slider for inputing a numeric value.
 pub const Slider = struct {
     rect: Rect,
     data: *Slider.Data,
     id: []const u8,
 
-    /// Returns new value. If `return_on_change` is true, returns every frame
-    /// when the value changes, otherwise returns on mouse button release
+    /// Returns new value. If `return_on_change` is `true`, returns every frame when the
+    /// value changes, otherwise returns on mouse button release.
     pub fn draw(self: Slider, return_on_change: bool) ?f32 {
         return self.drawWithOptions(return_on_change, default_slider_options);
     }

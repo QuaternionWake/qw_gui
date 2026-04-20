@@ -114,12 +114,14 @@ fn nthItemRect(rect: b.Rectangle, n: usize) b.Rectangle {
     return result;
 }
 
+/// A dropdown containing a list of items.
 pub const Dropdown = struct {
     rect: Rect,
     items: []const []const u8,
     data: *Dropdown.Data,
     id: []const u8,
 
+    /// Returns the index of selected item.
     pub fn draw(self: Dropdown) ?usize {
         return self.drawWithOptions(default_dropdown_options);
     }
@@ -151,12 +153,14 @@ pub const Dropdown = struct {
     };
 };
 
+/// A dropdown whose list of items is made up of variants of an enum.
 pub fn EnumDropdown(Enum: type) type {
     return struct {
         rect: Rect,
         data: *EnumDropdown(Enum).Data,
         id: []const u8,
 
+        /// Returns selected value.
         pub fn draw(self: EnumDropdown(Enum)) ?Enum {
             return self.drawWithOptions(default_dropdown_options);
         }
