@@ -167,9 +167,9 @@ pub const Color = struct {
     pub const   light_cyan: Color = .fromIntRgb(0x15d9d9);
     pub const lighter_cyan: Color = .fromIntRgb(0x0df1de);
 
-    pub const  dark_asdf: Color = .fromIntRgb(0x09679e);
-    pub const       asdf: Color = .fromIntRgb(0x0c87d4);
-    pub const light_asdf: Color = .fromIntRgb(0x02a6ff);
+    pub const  dark_sky_blue: Color = .fromIntRgb(0x09679e);
+    pub const       sky_blue: Color = .fromIntRgb(0x0c87d4);
+    pub const light_sky_blue: Color = .fromIntRgb(0x02a6ff);
 
     pub const darker_blue: Color = .fromIntRgb(0x0e116d);
     pub const   dark_blue: Color = .fromIntRgb(0x0e19b6);
