@@ -96,7 +96,6 @@ const ModuleName = enum {
     lib,
     grabbing,
     backend,
-    rect,
 
     num_parse,
     num_format,
@@ -130,7 +129,6 @@ const modules = [_]Module{
             .{ .import_name = "qw_gui", .module_name = .lib },
             .{ .import_name = "grabbing", .module_name = .grabbing },
             .{ .import_name = "backend", .module_name = .backend },
-            .{ .import_name = "Rect", .module_name = .rect },
             .{ .import_name = "num_parse", .module_name = .num_parse },
             .{ .import_name = "num_format", .module_name = .num_format },
         },
@@ -147,13 +145,6 @@ const modules = [_]Module{
         .path = "src/backend.zig",
         .imports = &.{
             .{ .import_name = "raylib", .module_name = .raylib },
-        },
-    },
-    .{
-        .name = .rect,
-        .path = "src/Rect.zig",
-        .imports = &.{
-            .{ .import_name = "backend", .module_name = .backend },
         },
     },
 };
