@@ -9,6 +9,9 @@ pub const inputs = @import("elements/inputs.zig");
 pub const grabbing = @import("grabbing");
 
 pub const Color = b.Color;
+pub const Rect = b.Rect;
+
+pub const screenRect = b.screenRect;
 
 pub const State = enum { default, hovered, held, disabled };
 

@@ -5,11 +5,10 @@ const gui = @import("qw_gui");
 const b = @import("backend");
 const Color = b.Color;
 const g = @import("grabbing");
-const Rect = @import("Rect");
 
 pub fn drawSlider(
     options: SliderOptions,
-    rect: Rect,
+    rect: b.Rect,
     interaction: g.InteractionInfo,
     forced_style: ?gui.State,
     min: f32,
@@ -17,7 +16,6 @@ pub fn drawSlider(
     value: *f32,
     return_on_change: bool,
 ) ?f32 {
-    const rect_ = rect.vanillaRect();
     const holding, const hovering, const can_grab = interaction;
     const bg_color, const border_color, const box_color =
         if (forced_style) |s| switch (s) {
@@ -31,11 +29,11 @@ pub fn drawSlider(
             options.hovered_colors.get()
         else
             options.inactive_colors.get();
-    rect_.draw(bg_color);
-    rect_.drawOutline(border_color, options.border_thickness);
+    rect.draw(bg_color);
+    rect.drawOutline(border_color, options.border_thickness);
 
-    const min_x = rect_.x + options.border_thickness + options.padding + options.box_width / 2;
-    const max_x = rect_.x + rect_.width - options.border_thickness - options.padding - options.box_width / 2;
+    const min_x = rect.x + options.border_thickness + options.padding + options.box_width / 2;
+    const max_x = rect.x + rect.width - options.border_thickness - options.padding - options.box_width / 2;
 
     const mouse_x = b.getMousePosition().x;
     const slider_width = max_x - min_x;
@@ -56,11 +54,11 @@ pub fn drawSlider(
     else
         (value.* - min) / data_width * slider_width + min_x;
 
-    const box: b.Rectangle = .{
+    const box: b.Rect = .{
         .x = box_center_x - options.box_width / 2,
-        .y = rect_.y + options.border_thickness + options.padding,
+        .y = rect.y + options.border_thickness + options.padding,
         .width = options.box_width,
-        .height = rect_.height - (options.border_thickness + options.padding) * 2,
+        .height = rect.height - (options.border_thickness + options.padding) * 2,
     };
     box.draw(box_color);
 
@@ -74,21 +72,20 @@ pub fn drawSlider(
 
 /// A slider for inputing a numeric value.
 pub const Slider = struct {
-    rect: Rect,
     data: *Slider.Data,
     id: []const u8,
 
     /// Returns new value. If `return_on_change` is `true`, returns every frame when the
     /// value changes, otherwise returns on mouse button release.
-    pub fn draw(self: Slider, return_on_change: bool) ?f32 {
-        return self.drawWithOptions(return_on_change, default_slider_options);
+    pub fn draw(self: Slider, rect: b.Rect, return_on_change: bool) ?f32 {
+        return self.drawWithOptions(rect, return_on_change, default_slider_options);
     }
 
-    pub fn drawWithOptions(self: Slider, return_on_change: bool, options: SliderOptions) ?f32 {
+    pub fn drawWithOptions(self: Slider, rect: b.Rect, return_on_change: bool, options: SliderOptions) ?f32 {
         return drawSlider(
             options,
-            self.rect,
-            self.grab(),
+            rect,
+            self.grab(rect),
             null,
             self.data.min,
             self.data.max,
@@ -97,8 +94,8 @@ pub const Slider = struct {
         );
     }
 
-    pub fn grab(self: Slider) g.InteractionInfo {
-        if (self.rect.vanillaRect().containsPoint(b.getMousePosition())) {
+    pub fn grab(self: Slider, rect: b.Rect) g.InteractionInfo {
+        if (rect.containsPoint(b.getMousePosition())) {
             g.hoverElement(self.id);
             g.grabElement(self.id);
         }

@@ -5,18 +5,16 @@ const gui = @import("qw_gui");
 const b = @import("backend");
 const Color = b.Color;
 const g = @import("grabbing");
-const Rect = @import("Rect");
 
 pub fn drawDropdown(
     options: DropdownOptions,
-    rect: Rect,
+    rect: b.Rect,
     interaction: g.InteractionInfo,
     forced_style: ?gui.State,
     items: []const []const u8,
     selected: *usize,
     editing: *bool,
 ) ?usize {
-    const rect_ = rect.vanillaRect();
     const holding, const hovering, const can_grab = interaction;
     const bg_color, const border_color, const text_color =
         if (forced_style) |s| switch (s) {
@@ -31,13 +29,13 @@ pub fn drawDropdown(
         else
             options.inactive_colors.get();
 
-    rect_.draw(bg_color);
-    rect_.drawOutline(border_color, options.border_thickness);
+    rect.draw(bg_color);
+    rect.drawOutline(border_color, options.border_thickness);
 
     const arrow_height = options.text_options.size / 2;
-    const arrow_rect: b.Rectangle = .{
-        .x = rect_.x + rect_.width - arrow_height * 2 - 5 - options.border_thickness,
-        .y = rect_.y + (rect_.height - arrow_height) / 2,
+    const arrow_rect: b.Rect = .{
+        .x = rect.x + rect.width - arrow_height * 2 - 5 - options.border_thickness,
+        .y = rect.y + (rect.height - arrow_height) / 2,
         .width = arrow_height * 2,
         .height = arrow_height,
     };
@@ -51,13 +49,13 @@ pub fn drawDropdown(
     const selected_text = items[selected.*];
     const text_size = b.measureText(options.text_options, selected_text);
     const text_pos: b.Vec2 = .{
-        .x = rect_.x + (rect_.width - text_size.x - arrow_rect.width) / 2,
-        .y = rect_.y + (rect_.height - text_size.y) / 2,
+        .x = rect.x + (rect.width - text_size.x - arrow_rect.width) / 2,
+        .y = rect.y + (rect.height - text_size.y) / 2,
     };
     b.drawText(options.text_options, selected_text, text_pos, text_color);
 
     if (holding.currently and hovering.currently) {
-        if (holding == g.HoldInfo.grabbed and rect_.containsPoint(b.getMousePosition())) {
+        if (holding == g.HoldInfo.grabbed and rect.containsPoint(b.getMousePosition())) {
             editing.* = !editing.*;
         }
     } else if (b.getMouseButtonState(.left) == b.MouseButtonState.clicked) {
@@ -65,13 +63,13 @@ pub fn drawDropdown(
     }
 
     if (editing.*) {
-        const dropdown_rect = dropdownRect(rect_, items.len);
+        const dropdown_rect = dropdownRect(rect, items.len);
         dropdown_rect.draw(options.inactive_colors.background);
         dropdown_rect.drawOutline(options.inactive_colors.border, options.border_thickness);
 
         var result: ?usize = null;
         for (items, 0..) |item, i| {
-            const item_rect = nthItemRect(rect_, i);
+            const item_rect = nthItemRect(rect, i);
             const item_text_size = b.measureText(options.text_options, item);
             const item_text_pos: b.Vec2 = .{
                 .x = item_rect.x + (item_rect.width - item_text_size.x) / 2,
@@ -102,20 +100,20 @@ pub fn drawDropdown(
     return null;
 }
 
-fn fullRect(rect: b.Rectangle, len: usize) b.Rectangle {
+fn fullRect(rect: b.Rect, len: usize) b.Rect {
     var result = rect;
     result.height *= @floatFromInt(len + 1);
     return result;
 }
 
-fn dropdownRect(rect: b.Rectangle, len: usize) b.Rectangle {
+fn dropdownRect(rect: b.Rect, len: usize) b.Rect {
     var result = rect;
     result.y += result.height;
     result.height *= @floatFromInt(len);
     return result;
 }
 
-fn nthItemRect(rect: b.Rectangle, n: usize) b.Rectangle {
+fn nthItemRect(rect: b.Rect, n: usize) b.Rect {
     var result = rect;
     result.y += result.height * @as(f32, @floatFromInt(n + 1));
     return result;
@@ -123,21 +121,20 @@ fn nthItemRect(rect: b.Rectangle, n: usize) b.Rectangle {
 
 /// A dropdown containing a list of items.
 pub const Dropdown = struct {
-    rect: Rect,
     items: []const []const u8,
     data: *Dropdown.Data,
     id: []const u8,
 
     /// Returns the index of selected item.
-    pub fn draw(self: Dropdown) ?usize {
-        return self.drawWithOptions(default_dropdown_options);
+    pub fn draw(self: Dropdown, rect: b.Rect) ?usize {
+        return self.drawWithOptions(rect, default_dropdown_options);
     }
 
-    pub fn drawWithOptions(self: Dropdown, options: DropdownOptions) ?usize {
+    pub fn drawWithOptions(self: Dropdown, rect: b.Rect, options: DropdownOptions) ?usize {
         return drawDropdown(
             options,
-            self.rect,
-            self.grab(),
+            rect,
+            self.grab(rect),
             null,
             self.items,
             &self.data.selected,
@@ -145,9 +142,9 @@ pub const Dropdown = struct {
         );
     }
 
-    pub fn grab(self: Dropdown) g.InteractionInfo {
-        if (self.rect.vanillaRect().containsPoint(b.getMousePosition()) or
-            self.data.editing and fullRect(self.rect.vanillaRect(), self.items.len).containsPoint(b.getMousePosition()))
+    pub fn grab(self: Dropdown, rect: b.Rect) g.InteractionInfo {
+        if (rect.containsPoint(b.getMousePosition()) or
+            self.data.editing and fullRect(rect, self.items.len).containsPoint(b.getMousePosition()))
         {
             g.hoverElement(self.id);
             g.grabElement(self.id);
@@ -164,21 +161,20 @@ pub const Dropdown = struct {
 /// A dropdown whose list of items is made up of variants of an enum.
 pub fn EnumDropdown(Enum: type) type {
     return struct {
-        rect: Rect,
         data: *EnumDropdown(Enum).Data,
         id: []const u8,
 
         /// Returns selected value.
-        pub fn draw(self: EnumDropdown(Enum)) ?Enum {
-            return self.drawWithOptions(default_dropdown_options);
+        pub fn draw(self: EnumDropdown(Enum), rect: b.Rect) ?Enum {
+            return self.drawWithOptions(rect, default_dropdown_options);
         }
 
-        pub fn drawWithOptions(self: EnumDropdown(Enum), options: DropdownOptions) ?Enum {
+        pub fn drawWithOptions(self: EnumDropdown(Enum), rect: b.Rect, options: DropdownOptions) ?Enum {
             var selected = mem.indexOfScalar(Enum, &variants, self.data.selected) orelse unreachable;
             const result = drawDropdown(
                 options,
-                self.rect,
-                self.grab(),
+                rect,
+                self.grab(rect),
                 null,
                 &items,
                 &selected,
@@ -192,9 +188,9 @@ pub fn EnumDropdown(Enum: type) type {
             return null;
         }
 
-        pub fn grab(self: EnumDropdown(Enum)) g.InteractionInfo {
-            if (self.rect.vanillaRect().containsPoint(b.getMousePosition()) or
-                self.data.editing and fullRect(self.rect.vanillaRect(), items.len).containsPoint(b.getMousePosition()))
+        pub fn grab(self: EnumDropdown(Enum), rect: b.Rect) g.InteractionInfo {
+            if (rect.containsPoint(b.getMousePosition()) or
+                self.data.editing and fullRect(rect, items.len).containsPoint(b.getMousePosition()))
             {
                 g.hoverElement(self.id);
                 g.grabElement(self.id);

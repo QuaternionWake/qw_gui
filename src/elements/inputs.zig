@@ -10,12 +10,11 @@ const gui = @import("qw_gui");
 const b = @import("backend");
 const Color = b.Color;
 const g = @import("grabbing");
-const Rect = @import("Rect");
 const buttons = @import("buttons.zig");
 
 pub fn drawTextInput(
     options: InputFieldOptions,
-    rect: Rect,
+    rect: b.Rect,
     interaction: g.InteractionInfo,
     forced_style: ?gui.State,
     buffer: []u8,
@@ -24,7 +23,6 @@ pub fn drawTextInput(
     return_on_change: bool,
 ) ?[]u8 {
     const text = buffer[0..text_len.*];
-    const rect_ = rect.vanillaRect();
     const holding, const hovering, const can_grab = interaction;
     const bg_color, const border_color, const text_color, const cursor_color =
         if (forced_style) |s| switch (s) {
@@ -39,19 +37,19 @@ pub fn drawTextInput(
         else
             options.inactive_colors.get();
 
-    rect_.draw(bg_color);
-    rect_.drawOutline(border_color, options.border_thickness);
+    rect.draw(bg_color);
+    rect.drawOutline(border_color, options.border_thickness);
 
     var result: ?[]u8 = null;
     if (!editing.* and holding == g.HoldInfo.grabbed) {
         editing.* = true;
     }
 
-    const text_rect: b.Rectangle = .{
-        .x = rect_.x + options.border_thickness + options.padding,
-        .y = rect_.y + options.border_thickness + options.padding,
-        .width = rect_.width - 2 * (options.border_thickness + options.padding),
-        .height = rect_.height - 2 * (options.border_thickness + options.padding),
+    const text_rect: b.Rect = .{
+        .x = rect.x + options.border_thickness + options.padding,
+        .y = rect.y + options.border_thickness + options.padding,
+        .width = rect.width - 2 * (options.border_thickness + options.padding),
+        .height = rect.height - 2 * (options.border_thickness + options.padding),
     };
     const max_text_width = text_rect.width;
     const text_options = blk: {
@@ -68,7 +66,7 @@ pub fn drawTextInput(
             .y = text_rect.y,
         };
         b.drawText(text_options, substring, text_pos, text_color);
-        const cursor_rect: b.Rectangle = .{
+        const cursor_rect: b.Rect = .{
             .x = text_pos.x + text_width + options.cursor_padding,
             .y = text_pos.y,
             .width = options.cursor_width,
@@ -129,7 +127,6 @@ pub fn drawTextInput(
 
 /// A single-line text input field.
 pub const TextInput = struct {
-    rect: Rect,
     data: *TextInput.Data,
     id: []const u8,
 
@@ -139,15 +136,15 @@ pub const TextInput = struct {
     ///
     /// If the editing is canceled, the new value will not be returned, but **will** be
     /// saved in `.data`.
-    pub fn draw(self: TextInput, return_on_change: bool) ?[]u8 {
-        return self.drawWithOptions(return_on_change, default_input_field_options);
+    pub fn draw(self: TextInput, rect: b.Rect, return_on_change: bool) ?[]u8 {
+        return self.drawWithOptions(rect, return_on_change, default_input_field_options);
     }
 
-    pub fn drawWithOptions(self: TextInput, return_on_change: bool, options: InputFieldOptions) ?[]u8 {
+    pub fn drawWithOptions(self: TextInput, rect: b.Rect, return_on_change: bool, options: InputFieldOptions) ?[]u8 {
         return drawTextInput(
             options,
-            self.rect,
-            self.grab(),
+            rect,
+            self.grab(rect),
             null,
             self.data.buffer,
             &self.data.text_len,
@@ -156,8 +153,8 @@ pub const TextInput = struct {
         );
     }
 
-    pub fn grab(self: TextInput) g.InteractionInfo {
-        if (self.rect.vanillaRect().containsPoint(b.getMousePosition())) {
+    pub fn grab(self: TextInput, rect: b.Rect) g.InteractionInfo {
+        if (rect.containsPoint(b.getMousePosition())) {
             g.hoverElement(self.id);
             g.grabElement(self.id);
         }
@@ -174,7 +171,6 @@ pub const TextInput = struct {
 /// An input field for a numeric value.
 pub fn ValueInput(T: type) type {
     return struct {
-        rect: Rect,
         data: *ValueInput(T).Data,
         id: []const u8,
 
@@ -187,12 +183,12 @@ pub fn ValueInput(T: type) type {
         /// `.data` will not change. If this happens, and `return_on_change` was `true`, the
         /// last value returned by this function most likely won't be what is ultimately
         /// saved in `.data`.
-        pub fn draw(self: ValueInput(T), return_on_change: bool) ?T {
-            return self.drawWithOptions(return_on_change, default_input_field_options);
+        pub fn draw(self: ValueInput(T), rect: b.Rect, return_on_change: bool) ?T {
+            return self.drawWithOptions(return_on_change, rect, default_input_field_options);
         }
 
-        pub fn drawWithOptions(self: ValueInput(T), return_on_change: bool, options: InputFieldOptions) ?T {
-            const ii = self.grab();
+        pub fn drawWithOptions(self: ValueInput(T), rect: b.Rect, return_on_change: bool, options: InputFieldOptions) ?T {
+            const ii = self.grab(rect);
             // When editing starts
             if (!self.data.editing and ii.@"0" == g.HoldInfo.grabbed) {
                 const num_str = fmt.bufPrint(self.data.buffer, "{d}", .{self.data.value}) catch {
@@ -210,7 +206,7 @@ pub fn ValueInput(T: type) type {
             const prev_editing = self.data.editing;
             const new_text = drawTextInput(
                 options,
-                self.rect,
+                rect,
                 ii,
                 null,
                 self.data.buffer,
@@ -256,8 +252,8 @@ pub fn ValueInput(T: type) type {
             return result;
         }
 
-        pub fn grab(self: ValueInput(T)) g.InteractionInfo {
-            if (self.rect.vanillaRect().containsPoint(b.getMousePosition())) {
+        pub fn grab(self: ValueInput(T), rect: b.Rect) g.InteractionInfo {
+            if (rect.containsPoint(b.getMousePosition())) {
                 g.hoverElement(self.id);
                 g.grabElement(self.id);
             }
@@ -279,7 +275,6 @@ pub fn ValueInput(T: type) type {
 /// decrementing the value on the sides.
 pub fn ValueInputWithButtons(T: type) type {
     return struct {
-        rect: Rect,
         data: *ValueInputWithButtons(T).Data,
         id: []const u8,
 
@@ -292,21 +287,21 @@ pub fn ValueInputWithButtons(T: type) type {
         /// `.data` will not change. If this happens, and `return_on_change` was `true`, the
         /// last value returned by this function most likely won't be what is ultimately
         /// saved in `.data`
-        pub fn draw(self: ValueInputWithButtons(T), return_on_change: bool) ?T {
-            return self.drawWithOptions(return_on_change, default_input_field_options, buttons.default_button_options);
+        pub fn draw(self: ValueInputWithButtons(T), rect: b.Rect, return_on_change: bool) ?T {
+            return self.drawWithOptions(rect, return_on_change, default_input_field_options, buttons.default_button_options);
         }
 
-        pub fn drawWithOptions(self: ValueInputWithButtons(T), return_on_change: bool, input_options: InputFieldOptions, button_options: buttons.ButtonOptions) ?T {
+        pub fn drawWithOptions(self: ValueInputWithButtons(T), rect: b.Rect, return_on_change: bool, input_options: InputFieldOptions, button_options: buttons.ButtonOptions) ?T {
             const not_interacting: g.InteractionInfo = .{
                 .{ .currently = false, .previously = false },
                 .{ .currently = false, .previously = false },
                 false,
             };
-            const lbutton_rect, const text_rect, const rbutton_rect = self.rects();
-            const ii = self.grab();
-            const lbutton_ii = if (lbutton_rect.vanillaRect().containsPoint(b.getMousePosition())) ii else not_interacting;
-            const text_ii = if (text_rect.vanillaRect().containsPoint(b.getMousePosition())) ii else not_interacting;
-            const rbutton_ii = if (rbutton_rect.vanillaRect().containsPoint(b.getMousePosition())) ii else not_interacting;
+            const lbutton_rect, const text_rect, const rbutton_rect = rects(rect);
+            const ii = self.grab(rect);
+            const lbutton_ii = if (lbutton_rect.containsPoint(b.getMousePosition())) ii else not_interacting;
+            const text_ii = if (text_rect.containsPoint(b.getMousePosition())) ii else not_interacting;
+            const rbutton_ii = if (rbutton_rect.containsPoint(b.getMousePosition())) ii else not_interacting;
 
             // When editing starts
             if (!self.data.editing and text_ii.@"0" == g.HoldInfo.grabbed) {
@@ -371,8 +366,8 @@ pub fn ValueInputWithButtons(T: type) type {
             return result;
         }
 
-        pub fn grab(self: ValueInputWithButtons(T)) g.InteractionInfo {
-            if (self.rect.vanillaRect().containsPoint(b.getMousePosition())) {
+        pub fn grab(self: ValueInputWithButtons(T), rect: b.Rect) g.InteractionInfo {
+            if (rect.containsPoint(b.getMousePosition())) {
                 g.hoverElement(self.id);
                 g.grabElement(self.id);
             }
@@ -393,30 +388,26 @@ pub fn ValueInputWithButtons(T: type) type {
             }
         }
 
-        fn rects(self: *const ValueInputWithButtons(T)) struct { Rect, Rect, Rect } {
-            const rect = self.rect.vanillaRect();
+        fn rects(rect: b.Rect) struct { b.Rect, b.Rect, b.Rect } {
             const padding = 1;
-            const lbutton_rect: Rect = .{
-                .parent = &self.rect,
+            const lbutton_rect = rect.subrect(.{
                 .x = .{ .left = 0 },
                 .y = .{ .top = 0 },
                 .width = .{ .amount = rect.height },
                 .height = .max,
-            };
-            const text_rect: Rect = .{
-                .parent = &self.rect,
+            });
+            const text_rect = rect.subrect(.{
                 .x = .{ .middle = 0 },
                 .y = .{ .top = 0 },
                 .width = .{ .relative = -(rect.height + padding) * 2 },
                 .height = .max,
-            };
-            const rbutton_rect: Rect = .{
-                .parent = &self.rect,
+            });
+            const rbutton_rect = rect.subrect(.{
                 .x = .{ .right = 0 },
                 .y = .{ .top = 0 },
                 .width = .{ .amount = rect.height },
                 .height = .max,
-            };
+            });
             return .{ lbutton_rect, text_rect, rbutton_rect };
         }
 
