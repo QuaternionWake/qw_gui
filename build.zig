@@ -7,11 +7,16 @@ pub fn build(b: *std.Build) !void {
 
     var module_array: std.EnumArray(ModuleName, *std.Build.Module) = .init(undefined);
     for (modules) |module| {
-        const mod = b.createModule(.{
+        const options: std.Build.Module.CreateOptions = .{
             .root_source_file = b.path(module.path),
             .target = target,
             .optimize = optimize,
-        });
+        };
+        const mod =
+            if (module.public)
+                b.addModule(@tagName(module.name), options)
+            else
+                b.createModule(options);
         module_array.set(module.name, mod);
     }
 
@@ -39,7 +44,7 @@ pub fn build(b: *std.Build) !void {
     const lib = b.addLibrary(.{
         .linkage = .static,
         .name = "qw_gui",
-        .root_module = module_array.get(.lib),
+        .root_module = module_array.get(.qw_gui),
     });
 
     b.installArtifact(lib);
@@ -78,7 +83,7 @@ pub fn build(b: *std.Build) !void {
         });
 
         example_mod.addImport("raylib", module_array.get(.raylib));
-        example_mod.addImport("qw_gui", module_array.get(.lib));
+        example_mod.addImport("qw_gui", module_array.get(.qw_gui));
 
         const example_exe = b.addExecutable(.{
             .name = e.name,
@@ -93,7 +98,7 @@ pub fn build(b: *std.Build) !void {
 
 const ModuleName = enum {
     exe,
-    lib,
+    qw_gui,
     grabbing,
     backend,
     rect,
@@ -105,6 +110,7 @@ const ModuleName = enum {
 
 const Module = struct {
     name: ModuleName,
+    public: bool = false,
     path: []const u8,
     imports: []const Import = &.{},
 };
@@ -119,15 +125,16 @@ const modules = [_]Module{
         .name = .exe,
         .path = "src/main.zig",
         .imports = &.{
-            .{ .import_name = "qw_gui", .module_name = .lib },
+            .{ .import_name = "qw_gui", .module_name = .qw_gui },
             .{ .import_name = "raylib", .module_name = .raylib },
         },
     },
     .{
-        .name = .lib,
+        .name = .qw_gui,
         .path = "src/root.zig",
+        .public = true,
         .imports = &.{
-            .{ .import_name = "qw_gui", .module_name = .lib },
+            .{ .import_name = "qw_gui", .module_name = .qw_gui },
             .{ .import_name = "grabbing", .module_name = .grabbing },
             .{ .import_name = "backend", .module_name = .backend },
             .{ .import_name = "Rect", .module_name = .rect },
