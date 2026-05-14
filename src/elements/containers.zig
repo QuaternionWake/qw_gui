@@ -1,19 +1,15 @@
 const b = @import("backend");
 const Color = b.Color;
 const g = @import("grabbing");
-const Rect = @import("Rect");
 
 pub const Panel = struct {
-    rect: Rect,
     title: ?[]const u8,
 
-    pub fn draw(self: Panel) void {
-        self.drawWithOptions(default_panel_options);
+    pub fn draw(self: Panel, rect: b.Rectangle) void {
+        self.drawWithOptions(rect, default_panel_options);
     }
 
-    pub fn drawWithOptions(self: Panel, options: PanelOptions) void {
-        const rect = self.rect.vanillaRect();
-
+    pub fn drawWithOptions(self: Panel, rect: b.Rectangle, options: PanelOptions) void {
         rect.draw(options.colors.background);
         rect.drawOutline(options.colors.border, options.border_thickness);
 
@@ -59,15 +55,13 @@ pub const PanelOptions = struct {
 };
 
 pub const GroupBox = struct {
-    rect: Rect,
     title: ?[]const u8,
 
-    pub fn draw(self: GroupBox) void {
-        self.drawWithOptions(default_groupbox_options);
+    pub fn draw(self: GroupBox, rect: b.Rectangle) void {
+        self.drawWithOptions(rect, default_groupbox_options);
     }
 
-    pub fn drawWithOptions(self: GroupBox, options: GroupBoxOptions) void {
-        const rect = self.rect.vanillaRect();
+    pub fn drawWithOptions(self: GroupBox, rect: b.Rectangle, options: GroupBoxOptions) void {
         const left_edge: b.Rectangle = .{
             .x = rect.x,
             .y = rect.y,

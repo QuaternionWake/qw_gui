@@ -232,63 +232,44 @@ pub const Rectangle = struct {
             (point.y >= self.y and point.y <= self.y + self.height);
     }
 
-    pub fn subrect(parent: Rectangle, x: XPos, y: YPos, width: Width, height: Height) Rectangle {
-        const width_ = switch (width) {
+    pub fn subrect(parent: Rectangle, options: SubrectOptions) Rectangle {
+        const width = switch (options.width) {
             .amount => |val| val,
             .relative => |val| parent.width + val,
             .proportion => |val| parent.width * val,
             .max => parent.width,
         };
 
-        const height_ = switch (height) {
+        const height = switch (options.height) {
             .amount => |val| val,
             .relative => |val| parent.height + val,
             .proportion => |val| parent.height * val,
             .max => parent.height,
         };
 
-        const x_ = switch (x) {
+        const x = switch (options.x) {
             .left => |offset| parent.x + offset,
-            .middle => |offset| parent.x + (parent.width - width_) / 2 + offset,
-            .right => |offset| parent.x + parent.width - width_ + offset,
+            .middle => |offset| parent.x + (parent.width - width) / 2 + offset,
+            .right => |offset| parent.x + parent.width - width + offset,
         };
 
-        const y_ = switch (y) {
+        const y = switch (options.y) {
             .top => |offset| parent.y + offset,
-            .middle => |offset| parent.y + (parent.height - height_) / 2 + offset,
-            .bottom => |offset| parent.y + parent.height - height_ + offset,
+            .middle => |offset| parent.y + (parent.height - height) / 2 + offset,
+            .bottom => |offset| parent.y + parent.height - height + offset,
         };
 
-        return .init(x_, y_, width_, height_);
+        return .init(x, y, width, height);
     }
 
-    const XPos = union(enum) {
-        left: f32,
-        middle: f32,
-        right: f32,
+    const SubrectOptions = struct {
+        x: union(enum) { left: f32, middle: f32, right: f32 },
+        y: union(enum) { top: f32, middle: f32, bottom: f32 },
+        width: union(enum) { amount: f32, relative: f32, proportion: f32, max },
+        height: union(enum) { amount: f32, relative: f32, proportion: f32, max },
     };
 
-    const YPos = union(enum) {
-        top: f32,
-        middle: f32,
-        bottom: f32,
-    };
-
-    const Width = union(enum) {
-        amount: f32,
-        relative: f32,
-        proportion: f32,
-        max,
-    };
-
-    const Height = union(enum) {
-        amount: f32,
-        relative: f32,
-        proportion: f32,
-        max,
-    };
-
-    pub fn nthSubrectV(parent: Rectangle, n: usize, options: SubrectOptions) Rectangle {
+    pub fn nthSubrectV(parent: Rectangle, n: usize, options: NthSubrectOptions) Rectangle {
         var result = options.padding.subrect(parent);
         result.height = (result.height + options.gap) / options.total_subrects;
         result.y += result.height * n;
@@ -296,7 +277,7 @@ pub const Rectangle = struct {
         return result;
     }
 
-    pub fn nthSubrectH(parent: Rectangle, n: usize, options: SubrectOptions) Rectangle {
+    pub fn nthSubrectH(parent: Rectangle, n: usize, options: NthSubrectOptions) Rectangle {
         var result = options.padding.subrect(parent);
         result.width = (result.width + options.gap) / options.total_subrects;
         result.x += result.width * n;
@@ -304,7 +285,7 @@ pub const Rectangle = struct {
         return result;
     }
 
-    const SubrectOptions = struct {
+    const NthSubrectOptions = struct {
         total_subrects: usize,
         padding: Padding,
         gap: f32,

@@ -17,14 +17,34 @@ pub fn main() !void {
 
         rl.clearBackground(.ray_white);
 
-        if (increment_button.draw()) {
+        if (increment_button.draw(gui.screenRect().subrect(.{
+            .x = .{ .left = 150 },
+            .y = .{ .top = 150 },
+            .width = .{ .amount = 100 },
+            .height = .{ .amount = 60 },
+        }))) {
             counter +|= 1;
         }
-        if (decrement_button.drawWithOptions(decrement_button_options)) {
+        if (decrement_button.drawWithOptions(gui.screenRect().subrect(.{
+            .x = .{ .right = -150 },
+            .y = .{ .top = 150 },
+            .width = .{ .amount = 100 },
+            .height = .{ .amount = 60 },
+        }), decrement_button_options)) {
             counter -|= 1;
         }
-        reset_button.draw(.{&counter});
-        if (process_counter_button.draw(.{counter})) |value| {
+        reset_button.draw(gui.screenRect().subrect(.{
+            .x = .{ .left = 20 },
+            .y = .{ .top = 20 },
+            .width = .{ .amount = 100 },
+            .height = .{ .amount = 60 },
+        }), .{&counter});
+        if (process_counter_button.draw(gui.screenRect().subrect(.{
+            .x = .{ .left = 20 },
+            .y = .{ .top = 100 },
+            .width = .{ .amount = 100 },
+            .height = .{ .amount = 60 },
+        }), .{counter})) |value| {
             processed_value = value;
         }
 
@@ -44,25 +64,11 @@ fn processCounter(counter: u32) u32 {
 }
 
 const increment_button: gui.buttons.Button = .{
-    .rect = .{
-        .parent = null,
-        .x = .{ .left = 150 },
-        .y = .{ .top = 150 },
-        .width = .{ .amount = 100 },
-        .height = .{ .amount = 60 },
-    },
     .text = "Increment value",
     .id = "increment_button",
 };
 
 const decrement_button: gui.buttons.Button = .{
-    .rect = .{
-        .parent = null,
-        .x = .{ .right = -150 },
-        .y = .{ .top = 150 },
-        .width = .{ .amount = 100 },
-        .height = .{ .amount = 60 },
-    },
     .text = "Decrement value",
     .id = "decrement_button",
 };
@@ -73,26 +79,12 @@ const decrement_button_options: gui.buttons.ButtonOptions = .{
 };
 
 const reset_button: gui.buttons.FnButton(@TypeOf(resetCounter)) = .{
-    .rect = .{
-        .parent = null,
-        .x = .{ .left = 20 },
-        .y = .{ .top = 20 },
-        .width = .{ .amount = 100 },
-        .height = .{ .amount = 60 },
-    },
     .text = "Reset value",
     .func = resetCounter,
     .id = "reset_button",
 };
 
 const process_counter_button: gui.buttons.FnButton(@TypeOf(processCounter)) = .{
-    .rect = .{
-        .parent = null,
-        .x = .{ .left = 20 },
-        .y = .{ .top = 100 },
-        .width = .{ .amount = 100 },
-        .height = .{ .amount = 60 },
-    },
     .text = "Process value",
     .func = processCounter,
     .id = "process_button",
