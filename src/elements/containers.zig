@@ -5,11 +5,11 @@ const g = @import("grabbing");
 pub const Panel = struct {
     title: ?[]const u8,
 
-    pub fn draw(self: Panel, rect: b.Rectangle) void {
+    pub fn draw(self: Panel, rect: b.Rect) void {
         self.drawWithOptions(rect, default_panel_options);
     }
 
-    pub fn drawWithOptions(self: Panel, rect: b.Rectangle, options: PanelOptions) void {
+    pub fn drawWithOptions(self: Panel, rect: b.Rect, options: PanelOptions) void {
         rect.draw(options.colors.background);
         rect.drawOutline(options.colors.border, options.border_thickness);
 
@@ -57,30 +57,30 @@ pub const PanelOptions = struct {
 pub const GroupBox = struct {
     title: ?[]const u8,
 
-    pub fn draw(self: GroupBox, rect: b.Rectangle) void {
+    pub fn draw(self: GroupBox, rect: b.Rect) void {
         self.drawWithOptions(rect, default_groupbox_options);
     }
 
-    pub fn drawWithOptions(self: GroupBox, rect: b.Rectangle, options: GroupBoxOptions) void {
-        const left_edge: b.Rectangle = .{
+    pub fn drawWithOptions(self: GroupBox, rect: b.Rect, options: GroupBoxOptions) void {
+        const left_edge: b.Rect = .{
             .x = rect.x,
             .y = rect.y,
             .width = options.border_thickness,
             .height = rect.height,
         };
-        const right_edge: b.Rectangle = .{
+        const right_edge: b.Rect = .{
             .x = rect.x + rect.width - options.border_thickness,
             .y = rect.y,
             .width = options.border_thickness,
             .height = rect.height,
         };
-        const bottom_edge: b.Rectangle = .{
+        const bottom_edge: b.Rect = .{
             .x = rect.x + options.border_thickness,
             .y = rect.y + rect.height - options.border_thickness,
             .width = rect.width - 2 * options.border_thickness,
             .height = options.border_thickness,
         };
-        const top_edge: b.Rectangle = .{
+        const top_edge: b.Rect = .{
             .x = rect.x + options.border_thickness,
             .y = rect.y,
             .width = rect.width - 2 * options.border_thickness,

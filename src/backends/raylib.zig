@@ -4,11 +4,11 @@ const rl = @import("raylib");
 
 const b = @import("../backend.zig");
 
-pub fn drawRectangle(rectangle: b.Rectangle, color: b.Color) void {
+pub fn drawRectangle(rectangle: b.Rect, color: b.Color) void {
     rl.drawRectangleRec(toRlRect(rectangle), toRlColor(color));
 }
 
-pub fn drawRectangleOutline(rectangle: b.Rectangle, color: b.Color, thickness: f32) void {
+pub fn drawRectangleOutline(rectangle: b.Rect, color: b.Color, thickness: f32) void {
     rl.drawRectangleLinesEx(toRlRect(rectangle), thickness, toRlColor(color));
 }
 
@@ -226,7 +226,7 @@ fn toRlVec2(vec: b.Vec2) rl.Vector2 {
     };
 }
 
-fn toRlRect(rect: b.Rectangle) rl.Rectangle {
+fn toRlRect(rect: b.Rect) rl.Rectangle {
     return .{
         .x = rect.x,
         .y = rect.y,

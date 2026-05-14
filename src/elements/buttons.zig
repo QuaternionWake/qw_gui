@@ -5,7 +5,7 @@ const g = @import("grabbing");
 
 pub fn drawButton(
     options: ButtonOptions,
-    rect: b.Rectangle,
+    rect: b.Rect,
     interaction: g.InteractionInfo,
     forced_style: ?gui.State,
     text: []const u8,
@@ -43,11 +43,11 @@ pub const Button = struct {
     id: []const u8,
 
     /// Returns `true` when clicked.
-    pub fn draw(self: Button, rect: b.Rectangle) bool {
+    pub fn draw(self: Button, rect: b.Rect) bool {
         return self.drawWithOptions(rect, default_button_options);
     }
 
-    pub fn drawWithOptions(self: Button, rect: b.Rectangle, options: ButtonOptions) bool {
+    pub fn drawWithOptions(self: Button, rect: b.Rect, options: ButtonOptions) bool {
         return drawButton(
             options,
             rect,
@@ -57,7 +57,7 @@ pub const Button = struct {
         );
     }
 
-    pub fn grab(self: Button, rect: b.Rectangle) g.InteractionInfo {
+    pub fn grab(self: Button, rect: b.Rect) g.InteractionInfo {
         if (rect.containsPoint(b.getMousePosition())) {
             g.hoverElement(self.id);
             g.grabElement(self.id);
@@ -78,11 +78,11 @@ pub fn FnButton(Fn: type) type {
 
         /// Executes `func` when clicked.
         /// If func has a non-`void` return type, returns its return value.
-        pub fn draw(self: FnButton(Fn), rect: b.Rectangle, args: anytype) ReturnType {
+        pub fn draw(self: FnButton(Fn), rect: b.Rect, args: anytype) ReturnType {
             return self.drawWithOptions(rect, default_button_options, args);
         }
 
-        pub fn drawWithOptions(self: FnButton(Fn), rect: b.Rectangle, options: ButtonOptions, args: anytype) ReturnType {
+        pub fn drawWithOptions(self: FnButton(Fn), rect: b.Rect, options: ButtonOptions, args: anytype) ReturnType {
             if (drawButton(
                 options,
                 rect,
@@ -95,7 +95,7 @@ pub fn FnButton(Fn: type) type {
             if (ReturnType != void) return null;
         }
 
-        pub fn grab(self: FnButton(Fn), rect: b.Rectangle) g.InteractionInfo {
+        pub fn grab(self: FnButton(Fn), rect: b.Rect) g.InteractionInfo {
             if (rect.containsPoint(b.getMousePosition())) {
                 g.hoverElement(self.id);
                 g.grabElement(self.id);
@@ -112,11 +112,11 @@ pub const ToggleButton = struct {
     id: []const u8,
 
     /// Returns new state when clicked.
-    pub fn draw(self: ToggleButton, rect: b.Rectangle) ?bool {
+    pub fn draw(self: ToggleButton, rect: b.Rect) ?bool {
         return self.drawWithOptions(rect, default_button_options);
     }
 
-    pub fn drawWithOptions(self: ToggleButton, rect: b.Rectangle, options: ButtonOptions) ?bool {
+    pub fn drawWithOptions(self: ToggleButton, rect: b.Rect, options: ButtonOptions) ?bool {
         const ii = self.grab(rect);
         const state: ?gui.State =
             if (self.data.pressed or (ii.@"0".holdingAny()) and ii.@"1".currently)
@@ -136,7 +136,7 @@ pub const ToggleButton = struct {
         return null;
     }
 
-    pub fn grab(self: ToggleButton, rect: b.Rectangle) g.InteractionInfo {
+    pub fn grab(self: ToggleButton, rect: b.Rect) g.InteractionInfo {
         if (rect.containsPoint(b.getMousePosition())) {
             g.hoverElement(self.id);
             g.grabElement(self.id);

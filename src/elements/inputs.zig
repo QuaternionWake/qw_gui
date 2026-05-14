@@ -14,7 +14,7 @@ const buttons = @import("buttons.zig");
 
 pub fn drawTextInput(
     options: InputFieldOptions,
-    rect: b.Rectangle,
+    rect: b.Rect,
     interaction: g.InteractionInfo,
     forced_style: ?gui.State,
     buffer: []u8,
@@ -45,7 +45,7 @@ pub fn drawTextInput(
         editing.* = true;
     }
 
-    const text_rect: b.Rectangle = .{
+    const text_rect: b.Rect = .{
         .x = rect.x + options.border_thickness + options.padding,
         .y = rect.y + options.border_thickness + options.padding,
         .width = rect.width - 2 * (options.border_thickness + options.padding),
@@ -66,7 +66,7 @@ pub fn drawTextInput(
             .y = text_rect.y,
         };
         b.drawText(text_options, substring, text_pos, text_color);
-        const cursor_rect: b.Rectangle = .{
+        const cursor_rect: b.Rect = .{
             .x = text_pos.x + text_width + options.cursor_padding,
             .y = text_pos.y,
             .width = options.cursor_width,
@@ -136,11 +136,11 @@ pub const TextInput = struct {
     ///
     /// If the editing is canceled, the new value will not be returned, but **will** be
     /// saved in `.data`.
-    pub fn draw(self: TextInput, rect: b.Rectangle, return_on_change: bool) ?[]u8 {
+    pub fn draw(self: TextInput, rect: b.Rect, return_on_change: bool) ?[]u8 {
         return self.drawWithOptions(rect, return_on_change, default_input_field_options);
     }
 
-    pub fn drawWithOptions(self: TextInput, rect: b.Rectangle, return_on_change: bool, options: InputFieldOptions) ?[]u8 {
+    pub fn drawWithOptions(self: TextInput, rect: b.Rect, return_on_change: bool, options: InputFieldOptions) ?[]u8 {
         return drawTextInput(
             options,
             rect,
@@ -153,7 +153,7 @@ pub const TextInput = struct {
         );
     }
 
-    pub fn grab(self: TextInput, rect: b.Rectangle) g.InteractionInfo {
+    pub fn grab(self: TextInput, rect: b.Rect) g.InteractionInfo {
         if (rect.containsPoint(b.getMousePosition())) {
             g.hoverElement(self.id);
             g.grabElement(self.id);
@@ -183,11 +183,11 @@ pub fn ValueInput(T: type) type {
         /// `.data` will not change. If this happens, and `return_on_change` was `true`, the
         /// last value returned by this function most likely won't be what is ultimately
         /// saved in `.data`.
-        pub fn draw(self: ValueInput(T), rect: b.Rectangle, return_on_change: bool) ?T {
+        pub fn draw(self: ValueInput(T), rect: b.Rect, return_on_change: bool) ?T {
             return self.drawWithOptions(return_on_change, rect, default_input_field_options);
         }
 
-        pub fn drawWithOptions(self: ValueInput(T), rect: b.Rectangle, return_on_change: bool, options: InputFieldOptions) ?T {
+        pub fn drawWithOptions(self: ValueInput(T), rect: b.Rect, return_on_change: bool, options: InputFieldOptions) ?T {
             const ii = self.grab(rect);
             // When editing starts
             if (!self.data.editing and ii.@"0" == g.HoldInfo.grabbed) {
@@ -252,7 +252,7 @@ pub fn ValueInput(T: type) type {
             return result;
         }
 
-        pub fn grab(self: ValueInput(T), rect: b.Rectangle) g.InteractionInfo {
+        pub fn grab(self: ValueInput(T), rect: b.Rect) g.InteractionInfo {
             if (rect.containsPoint(b.getMousePosition())) {
                 g.hoverElement(self.id);
                 g.grabElement(self.id);
@@ -287,11 +287,11 @@ pub fn ValueInputWithButtons(T: type) type {
         /// `.data` will not change. If this happens, and `return_on_change` was `true`, the
         /// last value returned by this function most likely won't be what is ultimately
         /// saved in `.data`
-        pub fn draw(self: ValueInputWithButtons(T), rect: b.Rectangle, return_on_change: bool) ?T {
+        pub fn draw(self: ValueInputWithButtons(T), rect: b.Rect, return_on_change: bool) ?T {
             return self.drawWithOptions(rect, return_on_change, default_input_field_options, buttons.default_button_options);
         }
 
-        pub fn drawWithOptions(self: ValueInputWithButtons(T), rect: b.Rectangle, return_on_change: bool, input_options: InputFieldOptions, button_options: buttons.ButtonOptions) ?T {
+        pub fn drawWithOptions(self: ValueInputWithButtons(T), rect: b.Rect, return_on_change: bool, input_options: InputFieldOptions, button_options: buttons.ButtonOptions) ?T {
             const not_interacting: g.InteractionInfo = .{
                 .{ .currently = false, .previously = false },
                 .{ .currently = false, .previously = false },
@@ -366,7 +366,7 @@ pub fn ValueInputWithButtons(T: type) type {
             return result;
         }
 
-        pub fn grab(self: ValueInputWithButtons(T), rect: b.Rectangle) g.InteractionInfo {
+        pub fn grab(self: ValueInputWithButtons(T), rect: b.Rect) g.InteractionInfo {
             if (rect.containsPoint(b.getMousePosition())) {
                 g.hoverElement(self.id);
                 g.grabElement(self.id);
@@ -388,7 +388,7 @@ pub fn ValueInputWithButtons(T: type) type {
             }
         }
 
-        fn rects(rect: b.Rectangle) struct { b.Rectangle, b.Rectangle, b.Rectangle } {
+        fn rects(rect: b.Rect) struct { b.Rect, b.Rect, b.Rect } {
             const padding = 1;
             const lbutton_rect = rect.subrect(.{
                 .x = .{ .left = 0 },

@@ -8,7 +8,7 @@ const g = @import("grabbing");
 
 pub fn drawSlider(
     options: SliderOptions,
-    rect: b.Rectangle,
+    rect: b.Rect,
     interaction: g.InteractionInfo,
     forced_style: ?gui.State,
     min: f32,
@@ -54,7 +54,7 @@ pub fn drawSlider(
     else
         (value.* - min) / data_width * slider_width + min_x;
 
-    const box: b.Rectangle = .{
+    const box: b.Rect = .{
         .x = box_center_x - options.box_width / 2,
         .y = rect.y + options.border_thickness + options.padding,
         .width = options.box_width,
@@ -77,11 +77,11 @@ pub const Slider = struct {
 
     /// Returns new value. If `return_on_change` is `true`, returns every frame when the
     /// value changes, otherwise returns on mouse button release.
-    pub fn draw(self: Slider, rect: b.Rectangle, return_on_change: bool) ?f32 {
+    pub fn draw(self: Slider, rect: b.Rect, return_on_change: bool) ?f32 {
         return self.drawWithOptions(rect, return_on_change, default_slider_options);
     }
 
-    pub fn drawWithOptions(self: Slider, rect: b.Rectangle, return_on_change: bool, options: SliderOptions) ?f32 {
+    pub fn drawWithOptions(self: Slider, rect: b.Rect, return_on_change: bool, options: SliderOptions) ?f32 {
         return drawSlider(
             options,
             rect,
@@ -94,7 +94,7 @@ pub const Slider = struct {
         );
     }
 
-    pub fn grab(self: Slider, rect: b.Rectangle) g.InteractionInfo {
+    pub fn grab(self: Slider, rect: b.Rect) g.InteractionInfo {
         if (rect.containsPoint(b.getMousePosition())) {
             g.hoverElement(self.id);
             g.grabElement(self.id);

@@ -205,13 +205,13 @@ pub const Vec2 = struct {
     pub const zero: Vec2 = .{ .x = 0, .y = 0 };
 };
 
-pub const Rectangle = struct {
+pub const Rect = struct {
     x: f32,
     y: f32,
     width: f32,
     height: f32,
 
-    pub fn init(x: f32, y: f32, width: f32, height: f32) Rectangle {
+    pub fn init(x: f32, y: f32, width: f32, height: f32) Rect {
         return .{
             .x = x,
             .y = y,
@@ -220,19 +220,19 @@ pub const Rectangle = struct {
         };
     }
 
-    pub fn center(self: Rectangle) Vec2 {
+    pub fn center(self: Rect) Vec2 {
         return .{
             .x = self.x + self.width / 2,
             .y = self.y + self.height / 2,
         };
     }
 
-    pub fn containsPoint(self: Rectangle, point: Vec2) bool {
+    pub fn containsPoint(self: Rect, point: Vec2) bool {
         return (point.x >= self.x and point.x <= self.x + self.width) and
             (point.y >= self.y and point.y <= self.y + self.height);
     }
 
-    pub fn subrect(parent: Rectangle, options: SubrectOptions) Rectangle {
+    pub fn subrect(parent: Rect, options: SubrectOptions) Rect {
         const width = switch (options.width) {
             .amount => |val| val,
             .relative => |val| parent.width + val,
@@ -269,7 +269,7 @@ pub const Rectangle = struct {
         height: union(enum) { amount: f32, relative: f32, proportion: f32, max },
     };
 
-    pub fn nthSubrectV(parent: Rectangle, n: usize, options: NthSubrectOptions) Rectangle {
+    pub fn nthSubrectV(parent: Rect, n: usize, options: NthSubrectOptions) Rect {
         var result = options.padding.subrect(parent);
         result.height = (result.height + options.gap) / options.total_subrects;
         result.y += result.height * n;
@@ -277,7 +277,7 @@ pub const Rectangle = struct {
         return result;
     }
 
-    pub fn nthSubrectH(parent: Rectangle, n: usize, options: NthSubrectOptions) Rectangle {
+    pub fn nthSubrectH(parent: Rect, n: usize, options: NthSubrectOptions) Rect {
         var result = options.padding.subrect(parent);
         result.width = (result.width + options.gap) / options.total_subrects;
         result.x += result.width * n;
@@ -291,7 +291,7 @@ pub const Rectangle = struct {
         gap: f32,
     };
 
-    pub fn gridSubrect(parent: Rectangle, x: usize, y: usize, options: GridSubrectOptions) Rectangle {
+    pub fn gridSubrect(parent: Rect, x: usize, y: usize, options: GridSubrectOptions) Rect {
         var result = options.padding.subrect(parent);
         result.width = (result.width + options.gap_x) / options.total_subrects_x;
         result.height = (result.height + options.gap_y) / options.total_subrects_y;
@@ -310,11 +310,11 @@ pub const Rectangle = struct {
         gap_y: f32,
     };
 
-    pub const draw: fn (Rectangle, Color) void = backend.drawRectangle;
-    pub const drawOutline: fn (Rectangle, Color, f32) void = backend.drawRectangleOutline;
+    pub const draw: fn (Rect, Color) void = backend.drawRectangle;
+    pub const drawOutline: fn (Rect, Color, f32) void = backend.drawRectangleOutline;
 };
 
-pub fn screenRect() Rectangle {
+pub fn screenRect() Rect {
     const window_size = getWindowSize();
     return .{
         .x = 0,
@@ -366,7 +366,7 @@ const Padding = struct {
         };
     }
 
-    fn subrect(self: Padding, rect: Rectangle) Rectangle {
+    fn subrect(self: Padding, rect: Rect) Rect {
         var result = rect;
         result.x += self.left;
         result.y += self.top;
