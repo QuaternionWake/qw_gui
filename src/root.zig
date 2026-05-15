@@ -1,4 +1,4 @@
-const b = @import("backend");
+pub const backend = @import("backend");
 
 pub const buttons = @import("elements/buttons.zig");
 pub const dropdowns = @import("elements/dropdowns.zig");
@@ -8,10 +8,30 @@ pub const inputs = @import("elements/inputs.zig");
 
 pub const grabbing = @import("grabbing");
 
-pub const Color = b.Color;
-pub const Rect = b.Rect;
+// Gui elements
+pub const Button = buttons.Button;
+pub const ToggleButton = buttons.ToggleButton;
+pub const FnButton = buttons.FnButton;
 
-pub const screenRect = b.screenRect;
+pub const Dropdown = dropdowns.Dropdown;
+pub const EnumDropdown = dropdowns.EnumDropdown;
+
+pub const Panel = containers.Panel;
+pub const GroupBox = containers.GroupBox;
+
+pub const Slider = sliders.Slider;
+
+pub const TextInput = inputs.TextInput;
+pub const ValueInput = inputs.ValueInput;
+pub const ValueInputWithButtons = inputs.ValueInputWithButtons;
+
+// Some useful backend stuffs
+pub const Color = backend.Color;
+pub const Rect = backend.Rect;
+pub const Padding = backend.Padding;
+pub const Vec2 = backend.Vec2;
+
+pub const screenRect = backend.screenRect;
 
 pub const State = enum { default, hovered, held, disabled };
 
@@ -30,7 +50,7 @@ pub fn updateGuiGlobals() void {
     }
 
     grabbing.hovered_element = null;
-    if (!b.getMouseButtonState(.left).currently) {
+    if (!backend.getMouseButtonState(.left).currently) {
         grabbing.held_element = null;
     }
 }

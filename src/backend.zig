@@ -262,7 +262,7 @@ pub const Rect = struct {
         return .init(x, y, width, height);
     }
 
-    const SubrectOptions = struct {
+    pub const SubrectOptions = struct {
         x: union(enum) { left: f32, middle: f32, right: f32 },
         y: union(enum) { top: f32, middle: f32, bottom: f32 },
         width: union(enum) { amount: f32, relative: f32, proportion: f32, max },
@@ -285,7 +285,7 @@ pub const Rect = struct {
         return result;
     }
 
-    const NthSubrectOptions = struct {
+    pub const NthSubrectOptions = struct {
         total_subrects: usize,
         padding: Padding,
         gap: f32,
@@ -302,7 +302,7 @@ pub const Rect = struct {
         return result;
     }
 
-    const GridSubrectOptions = struct {
+    pub const GridSubrectOptions = struct {
         total_subrects_x: usize,
         total_subrects_y: usize,
         padding: Padding,
@@ -324,7 +324,7 @@ pub fn screenRect() Rect {
     };
 }
 
-const Padding = struct {
+pub const Padding = struct {
     top: f32,
     right: f32,
     bottom: f32,
